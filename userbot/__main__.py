@@ -7,10 +7,8 @@
 # Please see: https://github.com/TgCatUB/catuserbot/blob/master/LICENSE
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-import os
 import contextlib
 import sys
-import subprocess
 
 import userbot
 from userbot import BOTLOG_CHATID, PM_LOGGER_GROUP_ID
@@ -41,22 +39,7 @@ try:
 except Exception as e:
     LOGS.error(f"{e}")
     sys.exit()
-    
-repo = Config.EXTERNAL_PLUGIN_REPO
-token = Config.GITHUB_ACCESS_TOKEN
-a, b, c, username, d, = repo.split("/")
-ppr = c + "/" + username + "/"  + d
-if token:
-    plug_repo = f"https://{username}:{token}@{ppr}.git"
-else:
-    plug_repo = repo
 
-try:
-    os.system(f"git clone {plug_repo}")
-    os.system("mv 'Plugins/external_plugins' 'userbot'")
-    os.system("rm -rf Plugins")
-except Exception as e:
-    LOGS.error(f"{e}")
 
 async def startup_process():
     await verifyLoggerGroup()
