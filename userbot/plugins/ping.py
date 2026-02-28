@@ -51,6 +51,7 @@ async def _(event):
     uptime = await get_readable_time((time.time() - StartTime))
     start = datetime.now()
     if flag == " -a":
+        start = datetime.now()
         catevent = await edit_or_reply(event, "`!....`")
         await asyncio.sleep(0.3)
         await edit_or_reply(catevent, "`..!..`")

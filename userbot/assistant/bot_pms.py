@@ -74,7 +74,7 @@ async def check_bot_started_users(user, event):
 
 
 @catub.bot_cmd(
-    pattern=f"^/start({botusername})?([\s]+)?$",
+    pattern=f"^/angel({botusername})?([\s]+)?$",
     incoming=True,
     func=lambda e: e.is_private,
 )
@@ -119,10 +119,10 @@ async def bot_start(event):  # sourcery skip: low-code-quality
                         \n\nPowered by [Catuserbot](https://t.me/catuserbot)"
         buttons = [
             (
-                Button.url("Repo", "https://github.com/TgCatUB/catuserbot"),
+                Button.url("Repo", "https://github.com/ZAR0X/catuserbot"),
                 Button.url(
                     "Deploy",
-                    "https://github.com/TgCatUB/nekopack",
+                    "https://graph.org/Catuserbot-Huggingface-Deploy-02-25",
                 ),
             )
         ]

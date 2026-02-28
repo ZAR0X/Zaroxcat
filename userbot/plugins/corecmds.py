@@ -9,13 +9,15 @@
 
 import contextlib
 import os
+import requests
+from datetime import datetime
 from pathlib import Path
 
 from ..Config import Config
 from ..core import CMD_INFO, PLG_INFO
 from ..helpers.google_tools import chromeDriver
 from ..utils import load_module, remove_plugin
-from . import CMD_HELP, CMD_LIST, SUDO_LIST, catub, edit_delete, edit_or_reply, reply_id
+from . import CMD_HELP, CMD_LIST, SUDO_LIST, catub, edit_delete, edit_or_reply, hmention, reply_id
 
 plugin_category = "tools"
 
@@ -35,7 +37,7 @@ def plug_checker(plugin):
 
 
 @catub.cat_cmd(
-    pattern="install(?:\s|$)([\s\S]*)",
+    pattern="(install|i)(?:\s|$)([\s\S]*)",
     command=("install", plugin_category),
     info={
         "header": "To install an external plugin.",
@@ -58,7 +60,7 @@ async def install(event):
                 load_module(shortname.replace(".py", ""), plugin_path=install_path)
                 await edit_delete(
                     event,
-                    f"Installed Plugin `{os.path.basename(downloaded_file_name)}`",
+                    f"Iɴsᴛᴀʟʟᴇᴅ Pʟᴜɢɪɴ `{os.path.basename(downloaded_file_name)}`",
                     10,
                 )
             else:
@@ -118,11 +120,17 @@ async def send(event):
             allow_cache=False,
             reply_to=reply_to_id,
             thumb=thumb,
-            caption=f"**➥ Plugin Name:-** `{input_str}`",
+            parse_mode="html",
+            caption=f"""
+<b>〣 Plugin Name:- {input_str}
+〣 Raw Text:- {raw_link} | {git_link}
+〣 Uploaded by {hmention}</b>""",
         )
         await event.delete()
+
     else:
-        await edit_or_reply(event, "404: File Not Found")
+        await edit_delete(event, "**404: File Not Found**")
+
 
 
 @catub.cat_cmd(
@@ -173,7 +181,7 @@ async def unload(event):
         CMD_HELP.pop(shortname)
     try:
         remove_plugin(shortname)
-        await edit_or_reply(event, f"{shortname} is Uninstalled successfully")
+        await edit_or_reply(event, f"{shortname} Is Uɴɪɴsᴛᴀʟʟᴇᴅ Sᴜᴄᴄᴇssғᴜʟʟʏ")
     except Exception as e:
         await edit_or_reply(event, f"Successfully uninstalled {shortname}\n{e}")
     if shortname in PLG_INFO:
@@ -232,3 +240,33 @@ async def app_log(event):
             )
             return os.remove(outfile)
     return await edit_or_reply(event, log, deflink=True, linktext=linktext)
+  
+@catub.cat_cmd(
+    pattern="getad ([\s\S]*)",
+    command=("getad", plugin_category),
+    info={
+        "header": "To install a plugin from github raw link.",
+        "description": "Install plugin from github raw link. ",
+        "usage": "{tr}getad <raw link>",
+    },
+)
+async def get_the_addons(event):
+    link = event.pattern_match.group(1)
+    xx = await edit_or_reply(event, "`Processing...`")
+    msg = "`Give raw link or Die!`"
+    if link is None:
+        return await edit_delete(xx, msg)
+    split_link = link.split("/")
+    if "raw" not in link:
+        return await edit_delete(xx, msg)
+    name = split_link[(len(split_link) - 1)]
+    plug = requests.get(link).text
+    fil = f"userbot/plugins/{name}"
+    with open(fil, "w", encoding="utf-8") as pepe:
+        pepe.write(plug)
+    shortname = name.split(".")[0]
+    try:
+        load_module(shortname)
+        await edit_delete(xx, "**Sᴜᴄᴄᴇssғᴜʟʟʏ Lᴏᴀᴅᴇᴅ** `{}`".format(shortname), 10)
+    except Exception:
+        await edit_delete(xx, "Error with {shortname}\n`{e}`")

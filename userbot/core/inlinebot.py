@@ -439,6 +439,68 @@ async def inline_handler(event):
         match2 = re.findall(inf, query)
         hid = re.compile("hide (.*)")
         match3 = re.findall(hid, query)
+        if query.startswith("ping"):
+            txt = f"• Ping • {mention} •"
+            button = [(Button.inline("Check", data="ping"))]
+            PIC = random.choice(gvarstatus("PING_PICS").split())
+            if PIC and PIC.endswith((".jpg", ".jpeg", ".png")):  # fk it im adding
+                result = builder.photo(
+                    PIC,
+                    text=txt,
+                    buttons=button,
+                )
+            elif PIC:
+                result = builder.document(
+                    PIC,
+                    title="Check Ping",
+                    text=txt,
+                    buttons=button,
+                )
+            else:
+                result = builder.article(
+                    title="Check Ping",
+                    text=txt,
+                    buttons=button,
+                )
+            await event.answer([result] if result else None)
+        if query.startswith("**Catuserbot"):
+            buttons = [
+                (
+                    Button.inline("Stats", data="stats"),
+                    Button.url("Repo", "https://github.com/MineisZarox/Zaroxcat"),
+                )
+            ]
+            ALIVE_PIC = gvarstatus("ALIVE_PIC")
+            IALIVE_PIC = gvarstatus("IALIVE_PIC")
+            if IALIVE_PIC:
+                CAT = [x for x in IALIVE_PIC.split()]
+                PIC = list(CAT)
+                I_IMG = random.choice(PIC)
+            if not IALIVE_PIC and ALIVE_PIC:
+                CAT = [x for x in ALIVE_PIC.split()]
+                PIC = list(CAT)
+                I_IMG = random.choice(PIC)
+            elif not IALIVE_PIC:
+                I_IMG = None
+            if I_IMG and I_IMG.endswith((".jpg", ".png")):
+                result = builder.photo(
+                    I_IMG,
+                    text=query,
+                    buttons=buttons,
+                )
+            elif I_IMG:
+                result = builder.document(
+                    I_IMG,
+                    title="Alive cat",
+                    text=query,
+                    buttons=buttons,
+                )
+            else:
+                result = builder.article(
+                    title="Alive cat",
+                    text=query,
+                    buttons=buttons,
+                )
         if string == "ialive":
             result = await article_builder(event, string)
             await event.answer([result] if result else None)

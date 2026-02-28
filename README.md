@@ -1,4 +1,4 @@
-# CatUserbot
+<h1 align="center"><img src="https://raw.githubusercontent.com/prono69/pepecat/master/userbot/helpers/resources/Music.gif" width="30px"> ZAROX CAT <img src="https://raw.githubusercontent.com/prono69/pepecat/master/userbot/helpers/resources/Music.gif" width="30px"></h1>
 
 A simple Telegram userbot based on Telethon .
 ![catuserbot logo](https://graph.org/file/4860c8e1a5a56d0616b79.png)
