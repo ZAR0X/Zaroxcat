@@ -1,4 +1,13 @@
-# speech to text module for catuserbot by uniborg (@spechide)
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~# CatUserBot #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# Copyright (C) 2020-2023 by TgCatUB@Github.
+
+# This file is part of: https://github.com/TgCatUB/catuserbot
+# and is released under the "GNU v3.0 License Agreement".
+
+# Please see: https://github.com/TgCatUB/catuserbot/blob/master/LICENSE
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# Special credits: @spechide (ported from uniborg)
+
 import os
 from datetime import datetime
 
@@ -33,7 +42,7 @@ async def _(event):
     if not os.path.isdir(Config.TEMP_DIR):
         os.makedirs(Config.TEMP_DIR)
     reply = await event.get_reply_message()
-    mediatype = media_type(reply)
+    mediatype = await media_type(reply)
     if not reply or (mediatype and mediatype not in ["Voice", "Audio"]):
         return await edit_delete(
             event,
@@ -47,11 +56,12 @@ async def _(event):
     }
     data = open(required_file_name, "rb").read()
     response = requests.post(
-        Config.IBM_WATSON_CRED_URL + "/v1/recognize",
+        f"{Config.IBM_WATSON_CRED_URL}/v1/recognize",
         headers=headers,
         data=data,
         auth=("apikey", Config.IBM_WATSON_CRED_PASSWORD),
     )
+
     r = response.json()
     if "results" not in r:
         return await catevent.edit(r["error"])
@@ -65,14 +75,11 @@ async def _(event):
         transcript_confidence += " " + str(alternatives["confidence"])
     end = datetime.now()
     ms = (end - start).seconds
-    if transcript_response == "":
-        string_to_show = "**Language : **`{}`\n**Time Taken : **`{} seconds`\n**No Results Found**".format(
-            lan, ms
-        )
-    else:
-        string_to_show = "**Language : **`{}`\n**Transcript : **`{}`\n**Time Taken : **`{} seconds`\n**Confidence : **`{}`".format(
-            lan, transcript_response, ms, transcript_confidence
-        )
+    string_to_show = (
+        f"**Language : **`{lan}`\n**Transcript : **`{transcript_response}`\n**Time Taken : **`{ms} seconds`\n**Confidence : **`{transcript_confidence}`"
+        if transcript_response
+        else f"**Language : **`{lan}`\n**Time Taken : **`{ms} seconds`\n**No Results Found**"
+    )
     await catevent.edit(string_to_show)
     # now, remove the temporary file
     os.remove(required_file_name)

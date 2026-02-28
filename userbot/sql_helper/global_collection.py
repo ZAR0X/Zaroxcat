@@ -1,3 +1,12 @@
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~# CatUserBot #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# Copyright (C) 2020-2023 by TgCatUB@Github.
+
+# This file is part of: https://github.com/TgCatUB/catuserbot
+# and is released under the "GNU v3.0 License Agreement".
+
+# Please see: https://github.com/TgCatUB/catuserbot/blob/master/LICENSE
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
 import threading
 
 from sqlalchemy import Column, PickleType, UnicodeText, distinct, func
@@ -15,13 +24,10 @@ class Cat_GlobalCollection(BASE):
         self.contents = tuple(contents)
 
     def __repr__(self):
-        return "<Cat Global Collection lists '%s' for %s>" % (
-            self.contents,
-            self.keywoard,
-        )
+        return f"<Cat Global Collection lists '{self.contents}' for {self.keywoard}>"
 
     def __eq__(self, other):
-        return bool(
+        return (
             isinstance(other, Cat_GlobalCollection)
             and self.keywoard == other.keywoard
             and self.contents == other.contents
@@ -52,10 +58,9 @@ def add_to_collectionlist(keywoard, contents):
 
 def rm_from_collectionlist(keywoard, contents):
     with CAT_GLOBALCOLLECTION:
-        keyword_items = SESSION.query(Cat_GlobalCollection).get(
+        if keyword_items := SESSION.query(Cat_GlobalCollection).get(
             (keywoard, tuple(contents))
-        )
-        if keyword_items:
+        ):
             if tuple(contents) in COLLECTION_SQL_.CONTENTS_LIST.get(keywoard, set()):
                 COLLECTION_SQL_.CONTENTS_LIST.get(keywoard, set()).remove(
                     tuple(contents)

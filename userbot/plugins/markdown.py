@@ -1,6 +1,16 @@
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~# CatUserBot #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# Copyright (C) 2020-2023 by TgCatUB@Github.
+
+# This file is part of: https://github.com/TgCatUB/catuserbot
+# and is released under the "GNU v3.0 License Agreement".
+
+# Please see: https://github.com/TgCatUB/catuserbot/blob/master/LICENSE
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
 import re
 from functools import partial
 from random import choice
@@ -10,10 +20,13 @@ from telethon.extensions.markdown import DEFAULT_URL_RE
 from telethon.tl import types
 from telethon.tl.functions.messages import EditMessageRequest
 from telethon.tl.types import (
+    MessageEntityBlockquote,
     MessageEntityBold,
     MessageEntityCode,
     MessageEntityItalic,
     MessageEntityPre,
+    MessageEntitySpoiler,
+    MessageEntityStrike,
     MessageEntityTextUrl,
     MessageEntityUnderline,
 )
@@ -42,7 +55,7 @@ def get_tag_parser(tag, entity):
         return m.group(1), entity(offset=m.start(), length=len(m.group(1)))
 
     tag = re.escape(tag)
-    return re.compile(tag + r"(.+?)" + tag, re.DOTALL), tag_parser
+    return re.compile(f"{tag}(.+?){tag}", re.DOTALL), tag_parser
 
 
 PRINTABLE_ASCII = range(0x21, 0x7F)
@@ -70,7 +83,7 @@ def parse_b_meme(m):
 
 
 def parse_subreddit(m):
-    text = "/" + m.group(3)
+    text = f"/{m.group(3)}"
     entity = MessageEntityTextUrl(
         offset=m.start(2), length=len(text), url=f"https://reddit.com{text}"
     )
@@ -100,6 +113,9 @@ MATCHERS = [
     (get_tag_parser("```", partial(MessageEntityPre, language=""))),
     (get_tag_parser("`", MessageEntityCode)),
     (get_tag_parser("--", MessageEntityUnderline)),
+    (get_tag_parser("||", MessageEntitySpoiler)),
+    (get_tag_parser(">>", MessageEntityBlockquote)),
+    (get_tag_parser("~~", MessageEntityStrike)),
     (re.compile(r"\+\+(.+?)\+\+"), parse_aesthetics),
     (re.compile(r"([^/\w]|^)(/?(r/\w+))"), parse_subreddit),
     (re.compile(r"(?<!\w)(~{2})(?!~~)(.+?)(?<!~)\1(?!\w)"), parse_strikethrough),
@@ -136,9 +152,7 @@ def parse(message, old_entities=None):
 
             text, entity = parser(match)
 
-            # Shift old entities after our current position (so they stay in place)
-            shift = len(text) - len(match[0])
-            if shift:
+            if shift := len(text) - len(match[0]):
                 for e in old_entities[after:]:
                     e.offset += shift
 

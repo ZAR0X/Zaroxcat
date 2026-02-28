@@ -1,3 +1,13 @@
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~# CatUserBot #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# Copyright (C) 2020-2023 by TgCatUB@Github.
+
+# This file is part of: https://github.com/TgCatUB/catuserbot
+# and is released under the "GNU v3.0 License Agreement".
+
+# Please see: https://github.com/TgCatUB/catuserbot/blob/master/LICENSE
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+import os
 from datetime import datetime
 
 from telethon.utils import get_display_name
@@ -17,6 +27,7 @@ from ..sql_helper.globals import addgvar, delgvar, gvarstatus
 plugin_category = "tools"
 
 LOGS = logging.getLogger(__name__)
+ENV = bool(os.environ.get("ENV", False))
 
 
 async def _init() -> None:
@@ -208,7 +219,7 @@ async def _(event):
         ],
     },
 )
-async def _(event):  # sourcery no-metrics
+async def _(event):  # sourcery no-metrics  # sourcery skip: low-code-quality
     "To enable cmds for sudo users."
     input_str = event.pattern_match.group(2)
     errors = ""
@@ -226,7 +237,6 @@ async def _(event):  # sourcery no-metrics
             + PLG_INFO["autoprofile"]
             + PLG_INFO["evaluators"]
             + PLG_INFO["execmod"]
-            + PLG_INFO["heroku"]
             + PLG_INFO["profile"]
             + PLG_INFO["pmpermit"]
             + PLG_INFO["custom"]
@@ -238,6 +248,7 @@ async def _(event):  # sourcery no-metrics
             + ["gauth"]
             + ["greset"]
         )
+        flagcmds = flagcmds + PLG_INFO["heroku"] if ENV else flagcmds + PLG_INFO["vps"]
         loadcmds = list(set(totalcmds) - set(flagcmds))
         if len(sudocmds) > 0:
             sqllist.del_keyword_list("sudo_enabled_cmds")
@@ -303,7 +314,7 @@ async def _(event):  # sourcery no-metrics
         ],
     },
 )
-async def _(event):  # sourcery no-metrics
+async def _(event):  # sourcery no-metrics  # sourcery skip: low-code-quality
     "To disable cmds for sudo users."
     input_str = event.pattern_match.group(2)
     errors = ""
@@ -327,7 +338,6 @@ async def _(event):  # sourcery no-metrics
             + PLG_INFO["autoprofile"]
             + PLG_INFO["evaluators"]
             + PLG_INFO["execmod"]
-            + PLG_INFO["heroku"]
             + PLG_INFO["profile"]
             + PLG_INFO["pmpermit"]
             + PLG_INFO["custom"]
@@ -339,6 +349,7 @@ async def _(event):  # sourcery no-metrics
             + ["gauth"]
             + ["greset"]
         )
+        flagcmds = flagcmds + PLG_INFO["heroku"] if ENV else flagcmds + PLG_INFO["vps"]
     elif input_str[0] == "-p":
         catevent = event
         input_str.remove("-p")
@@ -392,8 +403,8 @@ async def _(event):  # sourcery no-metrics
     "To show list of enabled cmds for sudo."
     input_str = event.pattern_match.group(1)
     sudocmds = sudo_enabled_cmds()
-    clist = {}
     error = ""
+    clist = {}
     if not input_str:
         text = "**The list of sudo enabled commands are :**"
         result = "**SUDO ENABLED COMMANDS**"
@@ -433,11 +444,7 @@ async def _(event):  # sourcery no-metrics
         for cmd in clist[plugin]:
             output += f"`{cmd}` "
         output += "\n\n"
-    finalstr = (
-        result
-        + f"\n\n**SUDO TRIGGER: **`{Config.SUDO_COMMAND_HAND_LER}`\n**Commands:** {count}\n\n"
-        + output
-    )
+    finalstr = f"{result}\n\n**SUDO TRIGGER: **`{Config.SUDO_COMMAND_HAND_LER}`\n**Commands:** {count}\n\n{output}"
     await edit_or_reply(event, finalstr, aslink=True, linktext=text)
 
 

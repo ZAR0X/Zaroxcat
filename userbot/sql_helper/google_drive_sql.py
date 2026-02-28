@@ -1,3 +1,12 @@
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~# CatUserBot #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# Copyright (C) 2020-2023 by TgCatUB@Github.
+
+# This file is part of: https://github.com/TgCatUB/catuserbot
+# and is released under the "GNU v3.0 License Agreement".
+
+# Please see: https://github.com/TgCatUB/catuserbot/blob/master/LICENSE
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
 from sqlalchemy import Column, String, Text
 
 from . import BASE, SESSION
@@ -36,8 +45,7 @@ def get_credentials(user):
 
 
 def clear_credentials(user):
-    saved_credentials = SESSION.query(GoogleDriveCreds).get(user)
-    if saved_credentials:
+    if saved_credentials := SESSION.query(GoogleDriveCreds).get(user):
         SESSION.delete(saved_credentials)
         SESSION.commit()
         return True

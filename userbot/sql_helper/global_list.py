@@ -1,3 +1,12 @@
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~# CatUserBot #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# Copyright (C) 2020-2023 by TgCatUB@Github.
+
+# This file is part of: https://github.com/TgCatUB/catuserbot
+# and is released under the "GNU v3.0 License Agreement".
+
+# Please see: https://github.com/TgCatUB/catuserbot/blob/master/LICENSE
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
 import threading
 
 from sqlalchemy import Column, String, UnicodeText, distinct, func
@@ -15,10 +24,10 @@ class CatGloballist(BASE):
         self.group_id = str(group_id)
 
     def __repr__(self):
-        return "<Cat global values '%s' for %s>" % (self.group_id, self.keywoard)
+        return f"<Cat global values '{self.group_id}' for {self.keywoard}>"
 
     def __eq__(self, other):
-        return bool(
+        return (
             isinstance(other, CatGloballist)
             and self.keywoard == other.keywoard
             and self.group_id == other.group_id
@@ -48,8 +57,9 @@ def add_to_list(keywoard, group_id):
 
 def rm_from_list(keywoard, group_id):
     with CATGLOBALLIST_INSERTION_LOCK:
-        broadcast_group = SESSION.query(CatGloballist).get((keywoard, str(group_id)))
-        if broadcast_group:
+        if broadcast_group := SESSION.query(CatGloballist).get(
+            (keywoard, str(group_id))
+        ):
             if str(group_id) in GLOBALLIST_SQL_.GLOBALLIST_VALUES.get(keywoard, set()):
                 GLOBALLIST_SQL_.GLOBALLIST_VALUES.get(keywoard, set()).remove(
                     str(group_id)

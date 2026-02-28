@@ -1,3 +1,12 @@
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~# CatUserBot #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# Copyright (C) 2020-2023 by TgCatUB@Github.
+
+# This file is part of: https://github.com/TgCatUB/catuserbot
+# and is released under the "GNU v3.0 License Agreement".
+
+# Please see: https://github.com/TgCatUB/catuserbot/blob/master/LICENSE
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
 import asyncio
 import io
 import math
@@ -42,7 +51,7 @@ async def _get_file_name(path: pathlib.Path, full: bool = True) -> str:
         ],
     },
 )
-async def _(event):  # sourcery no-metrics
+async def _(event):  # sourcery no-metrics  # sourcery skip: low-code-quality
     "To download the replied telegram file"
     mone = await edit_or_reply(event, "`Downloading....`")
     input_str = event.pattern_match.group(3)
@@ -67,7 +76,7 @@ async def _(event):  # sourcery no-metrics
             name += "_" + str(getattr(reply.document, "id", reply.id)) + ext
         if path and path.exists():
             if path.is_file():
-                newname = str(path.stem) + "_OLD"
+                newname = f"{str(path.stem)}_OLD"
                 path.rename(path.with_name(newname).with_suffix(path.suffix))
                 file_name = path
             else:
@@ -142,10 +151,11 @@ async def _(event):  # sourcery no-metrics
             percentage = downloader.get_progress() * 100
             dspeed = downloader.get_speed()
             progress_str = "`{0}{1} {2}`%".format(
-                "".join("▰" for i in range(math.floor(percentage / 5))),
-                "".join("▱" for i in range(20 - math.floor(percentage / 5))),
+                "".join("▰" for _ in range(math.floor(percentage / 5))),
+                "".join("▱" for _ in range(20 - math.floor(percentage / 5))),
                 round(percentage, 2),
             )
+
             estimated_total_time = downloader.get_eta(human=True)
             current_message = f"Downloading the file\
                                 \n\n**URL : **`{url}`\
@@ -166,7 +176,7 @@ async def _(event):  # sourcery no-metrics
                 f"**•  Downloaded in {ms} seconds.**\n**•  Downloaded file location :- ** `{os.path.relpath(downloaded_file_name,os.getcwd())}`"
             )
         else:
-            await mone.edit("Incorrect URL\n {}".format(input_str))
+            await mone.edit(f"Incorrect URL\n {input_str}")
     else:
         await mone.edit("`Reply to a message to download to my local server.`")
 
@@ -184,9 +194,11 @@ async def _(event):  # sourcery no-metrics
         ],
     },
 )
-async def _(event):  # sourcery no-metrics
+async def _(event):  # sourcery no-metrics  # sourcery skip: low-code-quality
     pwd = os.getcwd()
     input_str = event.pattern_match.group(3)
+    name = NAME
+    path = None
     if not input_str:
         return await edit_delete(
             event,
@@ -211,10 +223,7 @@ async def _(event):  # sourcery no-metrics
     for attr in getattr(reply.document, "attributes", []):
         if isinstance(attr, types.DocumentAttributeFilename):
             name = attr.file_name
-    if input_str:
-        path = pathlib.Path(os.path.join(location, input_str.strip()))
-    else:
-        path = pathlib.Path(os.path.join(location, name))
+    path = pathlib.Path(os.path.join(location, name))
     ext = get_extension(reply.document)
     if path and not path.suffix and ext:
         path = path.with_suffix(ext)
@@ -222,7 +231,7 @@ async def _(event):  # sourcery no-metrics
         name += "_" + str(getattr(reply.document, "id", reply.id)) + ext
     if path and path.exists():
         if path.is_file():
-            newname = str(path.stem) + "_OLD"
+            newname = f"{str(path.stem)}_OLD"
             path.rename(path.with_name(newname).with_suffix(path.suffix))
             file_name = path
         else:

@@ -1,3 +1,12 @@
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~# CatUserBot #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# Copyright (C) 2020-2023 by TgCatUB@Github.
+
+# This file is part of: https://github.com/TgCatUB/catuserbot
+# and is released under the "GNU v3.0 License Agreement".
+
+# Please see: https://github.com/TgCatUB/catuserbot/blob/master/LICENSE
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
 import threading
 
 from sqlalchemy import Column, String, UnicodeText, distinct, func
@@ -15,10 +24,10 @@ class BlackListFilters(BASE):
         self.trigger = trigger
 
     def __repr__(self):
-        return "<Blacklist filter '%s' for %s>" % (self.trigger, self.chat_id)
+        return f"<Blacklist filter '{self.trigger}' for {self.chat_id}>"
 
     def __eq__(self, other):
-        return bool(
+        return (
             isinstance(other, BlackListFilters)
             and self.chat_id == other.chat_id
             and self.trigger == other.trigger
@@ -49,8 +58,9 @@ def add_to_blacklist(chat_id, trigger):
 
 def rm_from_blacklist(chat_id, trigger):
     with BLACKLIST_FILTER_INSERTION_LOCK:
-        blacklist_filt = SESSION.query(BlackListFilters).get((str(chat_id), trigger))
-        if blacklist_filt:
+        if blacklist_filt := SESSION.query(BlackListFilters).get(
+            (str(chat_id), trigger)
+        ):
             if trigger in BLACKLIST_SQL_.CHAT_BLACKLISTS.get(
                 str(chat_id), set()
             ):  # sanity check

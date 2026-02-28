@@ -1,4 +1,17 @@
-# ported from paperplaneExtended by avinashreddy3108 for media support
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~# CatUserBot #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# Copyright (C) 2020-2023 by TgCatUB@Github.
+
+# This file is part of: https://github.com/TgCatUB/catuserbot
+# and is released under the "GNU v3.0 License Agreement".
+
+# Please see: https://github.com/TgCatUB/catuserbot/blob/master/LICENSE
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#
+# Special credits: [Avinash Reddy](https://t.me/avinashreddy3108) for media support
+# Ported from paperplaneExtended
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+import contextlib
 
 from userbot import catub
 
@@ -16,7 +29,7 @@ plugin_category = "utils"
 async def incom_note(event):
     if not BOTLOG:
         return
-    try:
+    with contextlib.suppress(AttributeError):
         if not (await event.get_sender()).bot:
             notename = event.text[1:]
             notename = notename.lower()
@@ -42,8 +55,6 @@ async def incom_note(event):
                         reply_to=message_id_to_reply,
                         link_preview=False,
                     )
-    except AttributeError:
-        pass
 
 
 @catub.cat_cmd(
@@ -146,8 +157,7 @@ async def on_snip_delete(event):
     "To delete paticular note in bot."
     name = event.pattern_match.group(1)
     name = name.lower()
-    catsnip = get_note(name)
-    if catsnip:
+    if catsnip := get_note(name):
         rm_note(name)
     else:
         return await edit_or_reply(

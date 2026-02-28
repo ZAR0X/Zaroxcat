@@ -1,11 +1,18 @@
-# Created by @Jisan7509
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~# CatUserBot #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# Copyright (C) 2020-2023 by TgCatUB@Github.
+
+# This file is part of: https://github.com/TgCatUB/catuserbot
+# and is released under the "GNU v3.0 License Agreement".
+
+# Please see: https://github.com/TgCatUB/catuserbot/blob/master/LICENSE
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 import random
 
 import requests
 
 from ..core.managers import edit_delete, edit_or_reply
-from ..helpers.utils import _catutils, reply_id
+from ..helpers import reply_id, unsavegif
 from . import catub
 
 plugin_category = "Extra"
@@ -49,5 +56,5 @@ async def some(event):
             f"https://media.giphy.com/media/{items}/giphy.gif",
             reply_to=reply_to_id,
         )
-        await _catutils.unsavegif(event, nood)
+        await unsavegif(event, nood)
     await catevent.delete()

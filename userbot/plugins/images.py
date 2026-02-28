@@ -1,4 +1,13 @@
-# image search for catuserbot
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~# CatUserBot #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# Copyright (C) 2020-2023 by TgCatUB@Github.
+
+# This file is part of: https://github.com/TgCatUB/catuserbot
+# and is released under the "GNU v3.0 License Agreement".
+
+# Please see: https://github.com/TgCatUB/catuserbot/blob/master/LICENSE
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+import contextlib
 import os
 import shutil
 
@@ -42,12 +51,11 @@ async def img_sampler(event):
     cat = await edit_or_reply(event, "`Processing...`")
     if event.pattern_match.group(1) != "":
         lim = int(event.pattern_match.group(1))
-        if lim > 10:
-            lim = int(10)
+        lim = min(lim, 10)
         if lim <= 0:
-            lim = int(1)
+            lim = 1
     else:
-        lim = int(3)
+        lim = 3
     response = googleimagesdownload()
     # creating list of arguments
     arguments = {
@@ -66,9 +74,7 @@ async def img_sampler(event):
         await event.client.send_file(event.chat_id, lst, reply_to=reply_to_id)
     except MediaEmptyError:
         for i in lst:
-            try:
+            with contextlib.suppress(MediaEmptyError):
                 await event.client.send_file(event.chat_id, i, reply_to=reply_to_id)
-            except MediaEmptyError:
-                pass
     shutil.rmtree(os.path.dirname(os.path.abspath(lst[0])))
     await cat.delete()

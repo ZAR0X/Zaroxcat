@@ -1,3 +1,12 @@
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~# CatUserBot #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# Copyright (C) 2020-2023 by TgCatUB@Github.
+
+# This file is part of: https://github.com/TgCatUB/catuserbot
+# and is released under the "GNU v3.0 License Agreement".
+
+# Please see: https://github.com/TgCatUB/catuserbot/blob/master/LICENSE
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
 import asyncio
 import io
 import os
@@ -57,14 +66,14 @@ async def zip_file(event):
     filepath = os.path.join(
         Config.TMP_DOWNLOAD_DIRECTORY, os.path.basename(Path(input_str))
     )
-    zip_file = zipfile.ZipFile(filepath + ".zip", "w")
+    zip_file = zipfile.ZipFile(f"{filepath}.zip", "w")
     with zip_file:
         for file in filePaths:
             zip_file.write(file)
     end = datetime.now()
     ms = (end - start).seconds
     await mone.edit(
-        f"Zipped the path `{input_str}` into `{filepath+'.zip'}` in __{ms}__ Seconds"
+        f"Zipped the path `{input_str}` into `{filepath}.zip` in __{ms}__ Seconds"
     )
 
 
@@ -122,9 +131,9 @@ async def tar_file(event):
     },
 )
 async def zip_file(event):  # sourcery no-metrics
+    # sourcery skip: low-code-quality
     "To unpack the zip file"
-    input_str = event.pattern_match.group(1)
-    if input_str:
+    if input_str := event.pattern_match.group(1):
         path = Path(input_str)
         if os.path.exists(path):
             start = datetime.now()
@@ -206,9 +215,9 @@ async def zip_file(event):  # sourcery no-metrics
     },
 )
 async def untar_file(event):  # sourcery no-metrics
+    # sourcery skip: low-code-quality
     "To unpack the tar file"
-    input_str = event.pattern_match.group(1)
-    if input_str:
+    if input_str := event.pattern_match.group(1):
         path = Path(input_str)
         if os.path.exists(path):
             start = datetime.now()

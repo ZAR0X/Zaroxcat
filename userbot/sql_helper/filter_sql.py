@@ -1,3 +1,12 @@
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~# CatUserBot #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# Copyright (C) 2020-2023 by TgCatUB@Github.
+
+# This file is part of: https://github.com/TgCatUB/catuserbot
+# and is released under the "GNU v3.0 License Agreement".
+
+# Please see: https://github.com/TgCatUB/catuserbot/blob/master/LICENSE
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
 from sqlalchemy import Column, Numeric, String, UnicodeText
 
 from . import BASE, SESSION
@@ -17,7 +26,7 @@ class Filter(BASE):
         self.f_mesg_id = f_mesg_id
 
     def __eq__(self, other):
-        return bool(
+        return (
             isinstance(other, Filter)
             and self.chat_id == other.chat_id
             and self.keyword == other.keyword
@@ -68,7 +77,6 @@ def remove_filter(chat_id, keyword):
 
 
 def remove_all_filters(chat_id):
-    saved_filter = SESSION.query(Filter).filter(Filter.chat_id == str(chat_id))
-    if saved_filter:
+    if saved_filter := SESSION.query(Filter).filter(Filter.chat_id == str(chat_id)):
         saved_filter.delete()
         SESSION.commit()

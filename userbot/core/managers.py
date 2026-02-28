@@ -1,3 +1,12 @@
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~# CatUserBot #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# Copyright (C) 2020-2023 by TgCatUB@Github.
+
+# This file is part of: https://github.com/TgCatUB/catuserbot
+# and is released under the "GNU v3.0 License Agreement".
+
+# Please see: https://github.com/TgCatUB/catuserbot/blob/master/LICENSE
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
 import asyncio
 import os
 
@@ -39,7 +48,7 @@ async def edit_or_reply(
     if aslink or deflink:
         linktext = linktext or "Message was to big so pasted to bin"
         response = await paste_message(text, pastetype="s")
-        text = linktext + f" [here]({response})"
+        text = f"{linktext} [here]({response})"
         if event.sender_id in sudo_users:
             if reply_to:
                 return await reply_to.reply(text, link_preview=link_preview)
@@ -67,7 +76,7 @@ async def edit_delete(event, text, time=None, parse_mode=None, link_preview=None
     sudo_users = _sudousers_list()
     parse_mode = parse_mode or "md"
     link_preview = link_preview or False
-    time = time or 5
+    time = time or 10
     if event.sender_id in sudo_users:
         reply_to = await event.get_reply_message()
         catevent = (

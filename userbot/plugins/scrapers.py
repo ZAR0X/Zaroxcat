@@ -1,3 +1,12 @@
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~# CatUserBot #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# Copyright (C) 2020-2023 by TgCatUB@Github.
+
+# This file is part of: https://github.com/TgCatUB/catuserbot
+# and is released under the "GNU v3.0 License Agreement".
+
+# Please see: https://github.com/TgCatUB/catuserbot/blob/master/LICENSE
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
 import os
 
 from bs4 import BeautifulSoup
@@ -7,7 +16,7 @@ from wikipedia.exceptions import DisambiguationError, PageError
 
 from userbot import catub
 
-from ..core.managers import edit_or_reply
+from ..core.managers import edit_delete, edit_or_reply
 from ..helpers.functions import get_cast, get_moviecollections, imdb, mov_titles
 from ..helpers.utils import reply_id
 from . import BOTLOG, BOTLOG_CHATID
@@ -52,7 +61,7 @@ async def wiki(event):
                 event, f"**Disambiguated page found.**\n\n{result}"
             )
         except PageError:
-            return await edit_or_delete(
+            return await edit_delete(
                 event, f"**Sorry i Can't find any results for **`{match}`"
             )
     await edit_or_reply(
@@ -72,13 +81,16 @@ async def wiki(event):
         "usage": "{tr}imdb <movie/series name>",
     },
 )
-async def imdb_query(event):  # sourcery no-metrics
+async def imdb_query(event):
     """To fetch imdb data about the given movie or series."""
     catevent = await edit_or_reply(event, "`searching........`")
     reply_to = await reply_id(event)
     try:
         movie_name = event.pattern_match.group(1)
-        movies = imdb.search_movie(movie_name)
+        try:
+            movies = imdb.search_movie(movie_name)
+        except Exception:
+            movies = imdb.search_movie_advanced(movie_name)
         movieid = movies[0].movieID
         movie = imdb.get_movie(movieid)
         moviekeys = list(movie.keys())
@@ -141,7 +153,7 @@ async def imdb_query(event):  # sourcery no-metrics
         if len(rtext) > 1024:
             extralimit = len(rtext) - 1024
             climit = len(resulttext) - extralimit - 20
-            resulttext = resulttext[:climit] + "...........</i>"
+            resulttext = f"{resulttext[:climit]}...........</i>"
         if imageurl:
             downloader = SmartDL(imageurl, moviepath, progress_bar=False)
             downloader.start(blocking=False)

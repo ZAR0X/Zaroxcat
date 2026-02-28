@@ -1,3 +1,12 @@
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~# CatUserBot #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# Copyright (C) 2020-2023 by TgCatUB@Github.
+
+# This file is part of: https://github.com/TgCatUB/catuserbot
+# and is released under the "GNU v3.0 License Agreement".
+
+# Please see: https://github.com/TgCatUB/catuserbot/blob/master/LICENSE
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
 import json
 import re
 import urllib.parse
@@ -11,7 +20,7 @@ from humanize import naturalsize
 from userbot import catub
 
 from ..core.logger import logging
-from ..core.managers import edit_or_reply
+from ..core.managers import edit_delete, edit_or_reply
 
 LOGS = logging.getLogger(__name__)
 plugin_category = "misc"
@@ -84,8 +93,7 @@ def gdrive(url: str) -> str:
     try:
         link = re.findall(r"\bhttps?://drive\.google\.com\S+", url)[0]
     except IndexError:
-        reply = "`No Google drive links found`\n"
-        return reply
+        return "`No Google drive links found`\n"
     file_id = ""
     reply = ""
     if link.find("view") != -1:
@@ -128,8 +136,7 @@ def zippy_share(url: str) -> str:
     try:
         link = re.findall(r"\bhttps?://.*zippyshare\.com\S+", url)[0]
     except IndexError:
-        reply = "`No ZippyShare links found`\n"
-        return reply
+        return "`No ZippyShare links found`\n"
     session = requests.Session()
     base_url = re.search("http.+.com", link).group()
     response = session.get(link)
@@ -139,11 +146,13 @@ def zippy_share(url: str) -> str:
         if "getElementById('dlbutton')" in script.text:
             url_raw = re.search(
                 r"= (?P<url>\".+\" \+ (?P<math>\(.+\)) .+);", script.text
-            ).group("url")
-            math = re.search(
-                r"= (?P<url>\".+\" \+ (?P<math>\(.+\)) .+);", script.text
-            ).group("math")
-            dl_url = url_raw.replace(math, '"' + str(eval(math)) + '"')
+            )["url"]
+
+            math = re.search(r"= (?P<url>\".+\" \+ (?P<math>\(.+\)) .+);", script.text)[
+                "math"
+            ]
+
+            dl_url = url_raw.replace(math, f'"{str(eval(math))}"')
             break
     dl_url = base_url + eval(dl_url)
     name = urllib.parse.unquote(dl_url.split("/")[-1])
@@ -158,8 +167,7 @@ def yandex_disk(url: str) -> str:
     try:
         link = re.findall(r"\bhttps?://.*yadi\.sk\S+", url)[0]
     except IndexError:
-        reply = "`No Yandex.Disk links found`\n"
-        return reply
+        return "`No Yandex.Disk links found`\n"
     api = "https://cloud-api.yandex.net/v1/disk/public/resources/download?public_key={}"
     try:
         dl_url = requests.get(api.format(link)).json()["href"]
@@ -178,8 +186,7 @@ def mega_dl(url: str) -> str:
     try:
         link = re.findall(r"\bhttps?://.*mega.*\.nz\S+", url)[0]
     except IndexError:
-        reply = "`No MEGA.nz links found`\n"
-        return reply
+        return "`No MEGA.nz links found`\n"
     command = f"bin/megadown -q -m {link}"
     result = popen(command).read()
     try:
@@ -202,8 +209,7 @@ def cm_ru(url: str) -> str:
     try:
         link = re.findall(r"\bhttps?://.*cloud\.mail\.ru\S+", url)[0]
     except IndexError:
-        reply = "`No cloud.mail.ru links found`\n"
-        return reply
+        return "`No cloud.mail.ru links found`\n"
     command = f"bin/cmrudl -s {link}"
     result = popen(command).read()
     result = result.splitlines()[-1]
@@ -224,8 +230,7 @@ def mediafire(url: str) -> str:
     try:
         link = re.findall(r"\bhttps?://.*mediafire\.com\S+", url)[0]
     except IndexError:
-        reply = "`No MediaFire links found`\n"
-        return reply
+        return "`No MediaFire links found`\n"
     reply = ""
     page = BeautifulSoup(requests.get(link).content, "lxml")
     info = page.find("a", {"aria-label": "Download file"})
@@ -241,8 +246,7 @@ def sourceforge(url: str) -> str:
     try:
         link = re.findall(r"\bhttps?://.*sourceforge\.net\S+", url)[0]
     except IndexError:
-        reply = "`No SourceForge links found`\n"
-        return reply
+        return "`No SourceForge links found`\n"
     file_path = re.findall(r"files([\s\S]*)/download", link)[0]
     reply = f"Mirrors for __{file_path.split('/')[-1]}__\n"
     project = re.findall(r"projects?/(.*?)/files", link)[0]
@@ -267,8 +271,7 @@ def osdn(url: str) -> str:
     try:
         link = re.findall(r"\bhttps?://.*osdn\.net\S+", url)[0]
     except IndexError:
-        reply = "`No OSDN links found`\n"
-        return reply
+        return "`No OSDN links found`\n"
     page = BeautifulSoup(requests.get(link, allow_redirects=True).content, "lxml")
     info = page.find("a", {"class": "mirror_link"})
     link = urllib.parse.unquote(osdn_link + info["href"])
@@ -287,8 +290,7 @@ def github(url: str) -> str:
     try:
         link = re.findall(r"\bhttps?://.*github\.com.*releases\S+", url)[0]
     except IndexError:
-        reply = "`No GitHub Releases links found`\n"
-        return reply
+        return "`No GitHub Releases links found`\n"
     reply = ""
     dl_url = ""
     download = requests.get(url, stream=True, allow_redirects=False)
@@ -306,8 +308,7 @@ def androidfilehost(url: str) -> str:
     try:
         link = re.findall(r"\bhttps?://.*androidfilehost.*fid.*\S+", url)[0]
     except IndexError:
-        reply = "`No AFH links found`\n"
-        return reply
+        return "`No AFH links found`\n"
     fid = re.findall(r"\?fid=([\s\S]*)", link)[0]
     session = requests.Session()
     user_agent = useragent()
@@ -362,3 +363,34 @@ def useragent():
     ).findAll("td", {"class": "useragent"})
     user_agent = choice(useragents)
     return user_agent.text
+
+
+def anonfiles(url: str) -> str:
+    reply = ""
+    html_s = requests.get(url).content
+    soup = BeautifulSoup(html_s, "html.parser")
+    _url = soup.find("a", attrs={"class": "btn-primary"})["href"]
+    name = _url.rsplit("/", 1)[1]
+    dl_url = _url.replace(" ", "%20")
+    reply += f"[{name}]({dl_url})\n"
+    return reply
+
+
+"""
+def onedrive(link: str) -> str:
+    link_without_query = urlparse(link)._replace(query=None).geturl()
+    direct_link_encoded = str(
+        standard_b64encode(bytes(link_without_query, "utf-8")), "utf-8"
+    )
+    direct_link1 = (
+        f"https://api.onedrive.com/v1.0/shares/u!{direct_link_encoded}/root/content"
+    )
+    resp = requests.head(direct_link1)
+    if resp.status_code != 302:
+        return "`Error: Unauthorized link, the link may be private`"
+    dl_link = resp.next.url
+    file_name = dl_link.rsplit("/", 1)[1]
+    resp2 = requests.head(dl_link)
+    dl_size = humanbytes(int(resp2.headers["Content-Length"]))
+    return f"[{file_name} ({dl_size})]({dl_link})"
+"""

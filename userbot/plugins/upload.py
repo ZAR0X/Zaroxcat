@@ -1,3 +1,12 @@
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~# CatUserBot #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# Copyright (C) 2020-2023 by TgCatUB@Github.
+
+# This file is part of: https://github.com/TgCatUB/catuserbot
+# and is released under the "GNU v3.0 License Agreement".
+
+# Please see: https://github.com/TgCatUB/catuserbot/blob/master/LICENSE
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
 import asyncio
 import io
 import os
@@ -40,13 +49,12 @@ async def catlst_of_files(path):
     files = []
     for dirname, dirnames, filenames in os.walk(path):
         # print path to all filenames.
-        for filename in filenames:
-            files.append(os.path.join(dirname, filename))
+        files.extend(os.path.join(dirname, filename) for filename in filenames)
     return files
 
 
 def get_video_thumb(file, output=None, width=320):
-    output = file + ".jpg"
+    output = f"{file}.jpg"
     metadata = extractMetadata(createParser(file))
     cmd = [
         "ffmpeg",
@@ -121,6 +129,7 @@ async def upload(path, event, udir_event, catflag=None):  # sourcery no-metrics
         await event.client.send_file(
             event.chat_id,
             file=media,
+            checker=f,
             caption=f"**File Name : **`{fname}`",
             reply_to=reply_to_id,
         )

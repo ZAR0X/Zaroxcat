@@ -1,3 +1,12 @@
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~# CatUserBot #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# Copyright (C) 2020-2023 by TgCatUB@Github.
+
+# This file is part of: https://github.com/TgCatUB/catuserbot
+# and is released under the "GNU v3.0 License Agreement".
+
+# Please see: https://github.com/TgCatUB/catuserbot/blob/master/LICENSE
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
 import requests
 from validators.url import url
 
@@ -29,13 +38,12 @@ async def _(event):
         )
     check = url(input_str)
     if not check:
-        catstr = "http://" + input_str
+        catstr = f"http://{input_str}"
         check = url(catstr)
     if not check:
         return await edit_delete(event, "`the given link is not supported`", 5)
     sample_url = f"https://da.gd/dns/{input_str}"
-    response_api = requests.get(sample_url).text
-    if response_api:
+    if response_api := requests.get(sample_url).text:
         await edit_or_reply(event, f"DNS records of {input_str} are \n{response_api}")
     else:
         await edit_or_reply(
@@ -49,7 +57,7 @@ async def _(event):
     info={
         "header": "To short the given url.",
         "usage": "{tr}short <url/reply to url>",
-        "examples": "{tr}short https://github.com/sandy1709/catuserbot",
+        "examples": "{tr}short https://github.com/TgCatUB/catuserbot",
     },
 )
 async def _(event):
@@ -64,15 +72,14 @@ async def _(event):
         )
     check = url(input_str)
     if not check:
-        catstr = f"http://" + input_str
+        catstr = f"http://{input_str}"
         check = url(catstr)
     if not check:
         return await edit_delete(event, "`the given link is not supported`", 5)
     if not input_str.startswith("http"):
-        input_str = "http://" + input_str
+        input_str = f"http://{input_str}"
     sample_url = f"https://da.gd/s?url={input_str}"
-    response_api = requests.get(sample_url).text
-    if response_api:
+    if response_api := requests.get(sample_url).text:
         await edit_or_reply(
             event, f"Generated {response_api} for {input_str}.", link_preview=False
         )
@@ -101,12 +108,12 @@ async def _(event):
         )
     check = url(input_str)
     if not check:
-        catstr = "http://" + input_str
+        catstr = f"http://{input_str}"
         check = url(catstr)
     if not check:
         return await edit_delete(event, "`the given link is not supported`", 5)
     if not input_str.startswith("http"):
-        input_str = "http://" + input_str
+        input_str = f"http://{input_str}"
     r = requests.get(input_str, allow_redirects=False)
     if str(r.status_code).startswith("3"):
         await edit_or_reply(
@@ -116,8 +123,7 @@ async def _(event):
         )
     else:
         await edit_or_reply(
-            event,
-            "Input URL {} returned status_code {}".format(input_str, r.status_code),
+            event, f"Input URL {input_str} returned status_code {r.status_code}"
         )
 
 
@@ -143,8 +149,8 @@ async def _(event):
         )
     check = url(input_str)
     if not check:
-        catstr = "http://" + input_str
+        catstr = f"http://{input_str}"
         check = url(catstr)
     if not check:
         return await edit_delete(event, "`the given link is not supported`", 5)
-    await edit_or_reply(event, "[ㅤㅤㅤㅤㅤㅤㅤ](" + input_str + ")")
+    await edit_or_reply(event, f"[ㅤㅤㅤㅤㅤㅤㅤ]({input_str})")

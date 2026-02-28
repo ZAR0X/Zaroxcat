@@ -1,3 +1,12 @@
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~# CatUserBot #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# Copyright (C) 2020-2023 by TgCatUB@Github.
+
+# This file is part of: https://github.com/TgCatUB/catuserbot
+# and is released under the "GNU v3.0 License Agreement".
+
+# Please see: https://github.com/TgCatUB/catuserbot/blob/master/LICENSE
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
 import re
 
 from telethon.utils import get_display_name
@@ -7,6 +16,7 @@ from userbot import catub
 from ..core.managers import edit_or_reply
 from ..sql_helper import blacklist_sql as sql
 from ..utils import is_admin
+from . import BOTLOG_CHATID
 
 plugin_category = "admin"
 
@@ -19,7 +29,7 @@ async def on_new_message(event):
     if not catadmin:
         return
     for snip in snips:
-        pattern = r"( |^|[^\w])" + re.escape(snip) + r"( |$|[^\w])"
+        pattern = f"( |^|[^\\w]){re.escape(snip)}( |$|[^\\w])"
         if re.search(pattern, name, flags=re.IGNORECASE):
             try:
                 await event.delete()
@@ -59,9 +69,7 @@ async def _(event):
         sql.add_to_blacklist(event.chat_id, trigger.lower())
     await edit_or_reply(
         event,
-        "Added {} triggers to the blacklist in the current chat".format(
-            len(to_blacklist)
-        ),
+        f"Added {len(to_blacklist)} triggers to the blacklist in the current chat",
     )
 
 

@@ -1,3 +1,12 @@
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~# CatUserBot #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# Copyright (C) 2020-2023 by TgCatUB@Github.
+
+# This file is part of: https://github.com/TgCatUB/catuserbot
+# and is released under the "GNU v3.0 License Agreement".
+
+# Please see: https://github.com/TgCatUB/catuserbot/blob/master/LICENSE
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
 import os
 from asyncio.exceptions import CancelledError
 from time import sleep
@@ -5,7 +14,7 @@ from time import sleep
 from userbot import catub
 
 from ..core.logger import logging
-from ..core.managers import edit_or_reply
+from ..core.managers import edit_delete, edit_or_reply
 from ..sql_helper.global_collection import (
     add_to_collectionlist,
     del_keyword_collectionlist,
@@ -47,7 +56,6 @@ async def _(event):
     except Exception as e:
         LOGS.error(e)
     try:
-        delgvar("ipaddress")
         await catub.disconnect()
     except CancelledError:
         pass
@@ -91,9 +99,9 @@ async def _(event):
     counter = int(event.pattern_match.group(1))
     if BOTLOG:
         await event.client.send_message(
-            BOTLOG_CHATID,
-            "You put the bot to sleep for " + str(counter) + " seconds",
+            BOTLOG_CHATID, f"You put the bot to sleep for {counter} seconds"
         )
+
     event = await edit_or_reply(event, f"`ok, let me sleep for {counter} seconds`")
     sleep(counter)
     await event.edit("`OK, I'm awake now.`")
@@ -115,10 +123,10 @@ async def set_pmlog(event):
     input_str = event.pattern_match.group(1)
     if input_str == "off":
         if gvarstatus("restartupdate") is None:
-            return await edit_delete(event, "__Notify was already disabled__")
+            return await edit_delete(event, "__Notify already disabled__")
         delgvar("restartupdate")
-        return await edit_or_reply(event, "__Notify was disabled successfully.__")
+        return await edit_or_reply(event, "__Notify is disable successfully.__")
     if gvarstatus("restartupdate") is None:
         addgvar("restartupdate", "turn-oned")
-        return await edit_or_reply(event, "__Notify was enabled successfully.__")
-    await edit_delete(event, "__Notify was already enabled.__")
+        return await edit_or_reply(event, "__Notify is enable successfully.__")
+    await edit_delete(event, "__Notify already enabled.__")

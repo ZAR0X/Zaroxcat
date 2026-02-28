@@ -1,3 +1,12 @@
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~# CatUserBot #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# Copyright (C) 2020-2023 by TgCatUB@Github.
+
+# This file is part of: https://github.com/TgCatUB/catuserbot
+# and is released under the "GNU v3.0 License Agreement".
+
+# Please see: https://github.com/TgCatUB/catuserbot/blob/master/LICENSE
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
 import asyncio
 from datetime import datetime
 
@@ -84,6 +93,7 @@ async def set_not_afk(event):
     incoming=True, func=lambda e: bool(e.mentioned or e.is_private), edited=False
 )
 async def on_afk(event):  # sourcery no-metrics
+    # sourcery skip: low-code-quality
     if AFK_.afk_on is False:
         return
     back_alivee = datetime.now()
@@ -147,7 +157,7 @@ async def on_afk(event):  # sourcery no-metrics
             full = await event.client.get_entity(event.message.from_id)
         except Exception as e:
             LOGS.info(str(e))
-        messaget = media_type(event)
+        messaget = await media_type(event)
         resalt = f"#AFK_TAGS \n<b>Group : </b><code>{hmm.title}</code>"
         if full is not None:
             resalt += f"\n<b>From : </b> 👤{_format.htmlmentionuser(full.first_name , full.id)}"
@@ -243,7 +253,7 @@ async def _(event):
 async def _(event):
     "To mark yourself as afk i.e. Away from keyboard (supports media)"
     reply = await event.get_reply_message()
-    media_t = media_type(reply)
+    media_t = await media_type(reply)
     if media_t == "Sticker" or not media_t:
         return await edit_or_reply(
             event, "`You haven't replied to any media to activate media afk`"

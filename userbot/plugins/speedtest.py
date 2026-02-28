@@ -1,6 +1,12 @@
-"""Check your internet speed powered by speedtest.net
-Syntax: .speedtest
-Available Options: image, file, text"""
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~# CatUserBot #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# Copyright (C) 2020-2023 by TgCatUB@Github.
+
+# This file is part of: https://github.com/TgCatUB/catuserbot
+# and is released under the "GNU v3.0 License Agreement".
+
+# Please see: https://github.com/TgCatUB/catuserbot/blob/master/LICENSE
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# Powered by speedtest.net
 
 from time import time
 
@@ -15,7 +21,7 @@ plugin_category = "utils"
 
 
 def convert_from_bytes(size):
-    power = 2 ** 10
+    power = 2**10
     n = 0
     units = {0: "", 1: "Kbps", 2: "Mbps", 3: "Gbps", 4: "Tbps"}
     while size > power:
@@ -45,10 +51,10 @@ async def _(event):
     input_str = event.pattern_match.group(1)
     as_text = False
     as_document = False
-    if input_str == "image":
-        as_document = False
-    elif input_str == "file":
+    if input_str == "file":
         as_document = True
+    elif input_str == "image":
+        as_document = False
     elif input_str == "text":
         as_text = True
     catevent = await edit_or_reply(
@@ -95,11 +101,12 @@ async def _(event):
             await event.client.send_file(
                 event.chat_id,
                 speedtest_image,
-                caption="**SpeedTest** completed in {} seconds".format(ms),
+                caption=f"**SpeedTest** completed in {ms} seconds",
                 force_document=as_document,
                 reply_to=reply_msg_id,
                 allow_cache=False,
             )
+
             await event.delete()
     except Exception as exc:
         await catevent.edit(

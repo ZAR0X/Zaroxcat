@@ -1,4 +1,12 @@
-# batmanpfp and thorpfp by @Nihinivi
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~# CatUserBot #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# Copyright (C) 2020-2023 by TgCatUB@Github.
+
+# This file is part of: https://github.com/TgCatUB/catuserbot
+# and is released under the "GNU v3.0 License Agreement".
+
+# Please see: https://github.com/TgCatUB/catuserbot/blob/master/LICENSE
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# Special Credits: @Nihinivi for batmanpfp and thorpfp
 
 import asyncio
 import base64
@@ -26,29 +34,16 @@ from ..sql_helper.global_list import (
     rm_from_list,
 )
 from ..sql_helper.globals import addgvar, delgvar, gvarstatus
-from . import (
-    AUTONAME,
-    BOTLOG,
-    BOTLOG_CHATID,
-    DEFAULT_BIO,
-    _catutils,
-    catub,
-    edit_delete,
-    logging,
-)
+from . import BOTLOG, BOTLOG_CHATID, _catutils, catub, edit_delete, logging
 
 plugin_category = "tools"
-DEFAULTUSERBIO = DEFAULT_BIO or " ᗯᗩᏆᎢᏆᑎᏀ ᏞᏆᏦᗴ ᎢᏆᗰᗴ  "
-DEFAULTUSER = AUTONAME or Config.ALIVE_NAME
+
 LOGS = logging.getLogger(__name__)
 
 FONT_FILE_TO_USE = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
-
 autopic_path = os.path.join(os.getcwd(), "userbot", "original_pic.png")
 digitalpic_path = os.path.join(os.getcwd(), "userbot", "digital_pic.png")
 autophoto_path = os.path.join(os.getcwd(), "userbot", "photo_pfp.png")
-
-digitalpfp = Config.DIGITAL_PIC or "https://telegra.ph/file/aeaebe33b1f3988a0b690.jpg"
 
 COLLECTION_STRINGS = {
     "batmanpfp_strings": [
@@ -67,13 +62,25 @@ COLLECTION_STRINGS = {
 }
 
 
+def fetch_data():
+    global DEFAULTUSERBIO, DEFAULTUSER, CHANGE_TIME, DEFAULT_PIC, digitalpfp
+    DEFAULTUSERBIO = gvarstatus("DEFAULT_BIO") or " ᗯᗩᏆᎢᏆᑎᏀ ᏞᏆᏦᗴ ᎢᏆᗰᗴ  "
+    DEFAULTUSER = gvarstatus("DEFAULT_NAME") or Config.ALIVE_NAME
+    CHANGE_TIME = int(gvarstatus("CHANGE_TIME") or "60")
+    DEFAULT_PIC = gvarstatus("DEFAULT_PIC") or None
+    digitalpfp = (
+        gvarstatus("DIGITAL_PIC") or "https://graph.org/file/aeaebe33b1f3988a0b690.jpg"
+    )
+
+
 async def autopicloop():
+    fetch_data()
     AUTOPICSTART = gvarstatus("autopic") == "true"
-    if AUTOPICSTART and Config.DEFAULT_PIC is None:
+    if AUTOPICSTART and DEFAULT_PIC is None:
         if BOTLOG:
             return await catub.send_message(
                 BOTLOG_CHATID,
-                "**Error**\n`For functing of autopic you need to set DEFAULT_PIC var in Heroku vars`",
+                "**Error**\n`For functing of autopic you need to set DEFAULT_PIC var in Database vars`",
             )
         return
     if gvarstatus("autopic") is not None:
@@ -83,7 +90,7 @@ async def autopicloop():
             LOGS.warn(str(e))
     while AUTOPICSTART:
         if not os.path.exists(autopic_path):
-            downloader = SmartDL(Config.DEFAULT_PIC, autopic_path, progress_bar=False)
+            downloader = SmartDL(DEFAULT_PIC, autopic_path, progress_bar=False)
             downloader.start(blocking=False)
             while not downloader.isFinished():
                 pass
@@ -101,13 +108,14 @@ async def autopicloop():
             await catub(functions.photos.UploadProfilePhotoRequest(file))
             os.remove(autophoto_path)
             counter += counter
-            await asyncio.sleep(Config.CHANGE_TIME)
+            await asyncio.sleep(CHANGE_TIME)
         except BaseException:
             return
         AUTOPICSTART = gvarstatus("autopic") == "true"
 
 
 async def custompfploop():
+    fetch_data()
     CUSTOMPICSTART = gvarstatus("CUSTOM_PFP") == "true"
     i = 0
     while CUSTOMPICSTART:
@@ -127,13 +135,14 @@ async def custompfploop():
             i += 1
             await catub(functions.photos.UploadProfilePhotoRequest(file))
             os.remove("donottouch.jpg")
-            await asyncio.sleep(Config.CHANGE_TIME)
+            await asyncio.sleep(CHANGE_TIME)
         except BaseException:
             return
         CUSTOMPICSTART = gvarstatus("CUSTOM_PFP") == "true"
 
 
 async def digitalpicloop():
+    fetch_data()
     DIGITALPICSTART = gvarstatus("digitalpic") == "true"
     i = 0
     while DIGITALPICSTART:
@@ -171,17 +180,18 @@ async def digitalpicloop():
 
 
 async def bloom_pfploop():
+    fetch_data()
     BLOOMSTART = gvarstatus("bloom") == "true"
-    if BLOOMSTART and Config.DEFAULT_PIC is None:
+    if BLOOMSTART and DEFAULT_PIC is None:
         if BOTLOG:
             return await catub.send_message(
                 BOTLOG_CHATID,
-                "**Error**\n`For functing of bloom you need to set DEFAULT_PIC var in Heroku vars`",
+                "**Error**\n`For functing of bloom you need to set DEFAULT_PIC var in Database vars`",
             )
         return
     while BLOOMSTART:
         if not os.path.exists(autopic_path):
-            downloader = SmartDL(Config.DEFAULT_PIC, autopic_path, progress_bar=False)
+            downloader = SmartDL(DEFAULT_PIC, autopic_path, progress_bar=False)
             downloader.start(blocking=False)
             while not downloader.isFinished():
                 pass
@@ -208,15 +218,15 @@ async def bloom_pfploop():
         try:
             await catub(functions.photos.UploadProfilePhotoRequest(file))
             os.remove(autophoto_path)
-            await asyncio.sleep(Config.CHANGE_TIME)
+            await asyncio.sleep(CHANGE_TIME)
         except BaseException:
             return
         BLOOMSTART = gvarstatus("bloom") == "true"
 
 
 async def autoname_loop():
-    AUTONAMESTART = gvarstatus("autoname") == "true"
-    while AUTONAMESTART:
+    fetch_data()
+    while AUTONAMESTART := gvarstatus("autoname") == "true":
         DM = time.strftime("%d-%m-%y")
         HM = time.strftime("%H:%M")
         name = f"⌚️ {HM}||›  {DEFAULTUSER} ‹||📅 {DM}"
@@ -226,13 +236,12 @@ async def autoname_loop():
         except FloodWaitError as ex:
             LOGS.warning(str(ex))
             await asyncio.sleep(ex.seconds)
-        await asyncio.sleep(Config.CHANGE_TIME)
-        AUTONAMESTART = gvarstatus("autoname") == "true"
+        await asyncio.sleep(CHANGE_TIME)
 
 
 async def autobio_loop():
-    AUTOBIOSTART = gvarstatus("autobio") == "true"
-    while AUTOBIOSTART:
+    fetch_data()
+    while AUTOBIOSTART := gvarstatus("autobio") == "true":
         DMY = time.strftime("%d.%m.%Y")
         HM = time.strftime("%H:%M")
         bio = f"📅 {DMY} | {DEFAULTUSERBIO} | ⌚️ {HM}"
@@ -242,17 +251,16 @@ async def autobio_loop():
         except FloodWaitError as ex:
             LOGS.warning(str(ex))
             await asyncio.sleep(ex.seconds)
-        await asyncio.sleep(Config.CHANGE_TIME)
-        AUTOBIOSTART = gvarstatus("autobio") == "true"
+        await asyncio.sleep(CHANGE_TIME)
 
 
 async def animeprofilepic(collection_images):
     rnd = random.randint(0, len(collection_images) - 1)
     pack = collection_images[rnd]
-    pc = requests.get("http://getwallpapers.com/collection/" + pack).text
+    pc = requests.get(f"http://getwallpapers.com/collection/{pack}").text
     f = re.compile(r"/\w+/full.+.jpg")
     f = f.findall(pc)
-    fy = "http://getwallpapers.com" + random.choice(f)
+    fy = f"http://getwallpapers.com{random.choice(f)}"
     if not os.path.exists("f.ttf"):
         urllib.request.urlretrieve(
             "https://github.com/rebel6969/mym/raw/master/Rebel-robot-Regular.ttf",
@@ -265,6 +273,7 @@ async def animeprofilepic(collection_images):
 
 
 async def autopfp_start():
+    fetch_data()
     if gvarstatus("autopfp_strings") is not None:
         AUTOPFP_START = True
         string_list = COLLECTION_STRINGS[gvarstatus("autopfp_strings")]
@@ -283,7 +292,7 @@ async def autopfp_start():
         i += 1
         await catub(functions.photos.UploadProfilePhotoRequest(file))
         await _catutils.runcmd("rm -rf donottouch.jpg")
-        await asyncio.sleep(Config.CHANGE_TIME)
+        await asyncio.sleep(CHANGE_TIME)
         AUTOPFP_START = gvarstatus("autopfp_strings") is not None
 
 
@@ -293,7 +302,7 @@ async def autopfp_start():
     info={
         "header": "Changes profile pic with random batman pics every 1 minute",
         "description": "Changes your profile pic every 1 minute with random batman pics.\
-        If you like to change the time then set CHANGE_TIME var in Heroku with time (in seconds) between each change of profilepic.",
+        If you like to change the time then set CHANGE_TIME var in Database with time (in seconds) between each change of profilepic.",
         "note": "To stop this do '.end batmanpfp'",
         "usage": "{tr}batmanpfp",
     },
@@ -314,7 +323,7 @@ async def _(event):
     info={
         "header": "Changes profile pic with random thor pics every 1 minute",
         "description": "Changes your profile pic every 1 minute with random thor pics.\
-        If you like to change the time then set CHANGE_TIME var in Heroku with time(in seconds) between each change of profilepic.",
+        If you like to change the time then set CHANGE_TIME var in Database with time(in seconds) between each change of profilepic.",
         "note": "To stop this do '.end thorpfp'",
         "usage": "{tr}thorpfp",
     },
@@ -335,10 +344,10 @@ async def _(event):
     info={
         "header": "Changes profile pic every 1 minute with the custom pic with time",
         "description": "If you like to change the time interval for every new pic change \
-            then set CHANGE_TIME var in Heroku with time(in seconds) between each change of profilepic.",
+            then set CHANGE_TIME var in Database with time(in seconds) between each change of profilepic.",
         "options": "you can give integer input with cmd like 40,55,75 ..etc.\
              So that your profile pic will rotate with that specific angle",
-        "note": "For functioning of this cmd you need to set DEFAULT_PIC var in heroku. \
+        "note": "For functioning of this cmd you need to set DEFAULT_PIC var in Database. \
             To stop this do '.end autopic'",
         "usage": [
             "{tr}autopic",
@@ -348,13 +357,14 @@ async def _(event):
 )
 async def _(event):
     "To set time on your profile pic"
-    if Config.DEFAULT_PIC is None:
+    fetch_data()
+    if DEFAULT_PIC is None:
         return await edit_delete(
             event,
-            "**Error**\nFor functing of autopic you need to set DEFAULT_PIC var in Heroku vars",
+            "**Error**\nFor functing of autopic you need to set DEFAULT_PIC var in Database vars",
             parse_mode=_format.parse_pre,
         )
-    downloader = SmartDL(Config.DEFAULT_PIC, autopic_path, progress_bar=False)
+    downloader = SmartDL(DEFAULT_PIC, autopic_path, progress_bar=False)
     downloader.start(blocking=False)
     while not downloader.isFinished():
         pass
@@ -381,7 +391,7 @@ async def _(event):
     info={
         "header": "Updates your profile pic every 1 minute with time on it",
         "description": "Deletes old profile pic and Update profile pic with new image with time on it.\
-             You can change this image by setting DIGITAL_PIC var in heroku with telegraph image link",
+             You can change this image by setting DIGITAL_PIC var in Database with telegraph image link",
         "note": "To stop this do '.end digitalpfp'",
         "usage": "{tr}digitalpfp",
     },
@@ -405,21 +415,22 @@ async def _(event):
     info={
         "header": "Changes profile pic every 1 minute with the random colour pic with time on it",
         "description": "If you like to change the time interval for every new pic chnage \
-            then set CHANGE_TIME var in Heroku with time(in seconds) between each change of profilepic.",
-        "note": "For functioning of this cmd you need to set DEFAULT_PIC var in heroku. \
+            then set CHANGE_TIME var in Database with time(in seconds) between each change of profilepic.",
+        "note": "For functioning of this cmd you need to set DEFAULT_PIC var in Database. \
             To stop this do '.end bloom'",
         "usage": "{tr}bloom",
     },
 )
 async def _(event):
     "To set random colour pic with time to profile pic"
-    if Config.DEFAULT_PIC is None:
+    fetch_data()
+    if DEFAULT_PIC is None:
         return await edit_delete(
             event,
-            "**Error**\nFor functing of bloom you need to set DEFAULT_PIC var in Heroku vars",
+            "**Error**\nFor functing of bloom you need to set DEFAULT_PIC var in Database vars",
             parse_mode=_format.parse_pre,
         )
-    downloader = SmartDL(Config.DEFAULT_PIC, autopic_path, progress_bar=True)
+    downloader = SmartDL(DEFAULT_PIC, autopic_path, progress_bar=True)
     downloader.start(blocking=False)
     while not downloader.isFinished():
         pass
@@ -435,7 +446,7 @@ async def _(event):
     command=("custompfp", plugin_category),
     info={
         "header": "Set Your Custom pfps",
-        "description": "Set links of pic to use them as auto profile. You can use cpfp or custompp as command",
+        "description": "Set links of pic to use them as auto profile. You can use cpfp or custompfp as command",
         "flags": {
             "a": "To add links for custom pfp",
             "r": "To remove links for custom pfp",
@@ -521,7 +532,7 @@ async def useless(event):  # sourcery no-metrics
     command=("autoname", plugin_category),
     info={
         "header": "Changes your name with time",
-        "description": "Updates your profile name along with time. Set AUTONAME var in heroku with your profile name,",
+        "description": "Updates your profile name along with time. Set DEFAULT_USER var in Database.",
         "note": "To stop this do '.end autoname'",
         "usage": "{tr}autoname",
     },
@@ -540,7 +551,7 @@ async def _(event):
     command=("autobio", plugin_category),
     info={
         "header": "Changes your bio with time",
-        "description": "Updates your profile bio along with time. Set DEFAULT_BIO var in heroku with your fav bio,",
+        "description": "Updates your profile bio along with time. Set DEFAULT_BIO var in Database with your fav bio,",
         "note": "To stop this do '.end autobio'",
         "usage": "{tr}autobio",
     },
@@ -574,8 +585,9 @@ async def _(event):
         "examples": ["{tr}end autopic"],
     },
 )
-async def _(event):  # sourcery no-metrics
+async def _(event):  # sourcery no-metrics  # sourcery skip: low-code-quality
     "To stop the functions of autoprofile plugin"
+    fetch_data()
     input_str = event.pattern_match.group(1)
     if input_str == "thorpfp" and gvarstatus("autopfp_strings") is not None:
         pfp_string = gvarstatus("autopfp_strings")[:-8]

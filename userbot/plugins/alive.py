@@ -1,10 +1,19 @@
-#This is plugin in modified by @MinsisZarox
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~# CatUserBot #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# Copyright (C) 2020-2023 by TgCatUB@Github.
+
+# This file is part of: https://github.com/TgCatUB/catuserbot
+# and is released under the "GNU v3.0 License Agreement".
+
+# Please see: https://github.com/TgCatUB/catuserbot/blob/master/LICENSE
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
 import random
 import re
 import time
 from platform import python_version
 from datetime import datetime
 
+import requests
 from telethon import version
 from telethon.events import CallbackQuery
 
@@ -58,33 +67,41 @@ async def amireallyalive(event):
     start = datetime.now()
     ANIME = f"{random.choice(ANIME_QUOTE)}"
     reply_to_id = await reply_id(event)
+    ANIME = None
+    cat_caption = gvarstatus("ALIVE_TEMPLATE") or temp
+    if "ANIME" in cat_caption:
+        data = requests.get("https://animechan.vercel.app/api/random").json()
+        ANIME = f"**“{data['quote']}” - {data['character']} ({data['anime']})**"
     uptime = await get_readable_time((time.time() - StartTime))
     _, check_sgnirts = check_data_base_heal_th()
     EMOJI = gvarstatus("ALIVE_EMOJI") or "✧✧"
     CUSTOM_ALIVE_TEXT = gvarstatus("ALIVE_TEXT") or ANIME
     CAT_IMG = gvarstatus("ALIVE_PIC")
-    end = datetime.now()
+    caption = cat_caption.format(
+        ALIVE_TEXT=ALIVE_TEXT,
+        ANIME=ANIME,
+        EMOJI=EMOJI,
+        mention=mention,
+        uptime=uptime,
+        telever=version.__version__,
+        catver=catversion,
+        pyver=python_version(),
+        dbhealth=check_sgnirts,
+        ping=ms,
+    )
     if CAT_IMG:
-        CAT = [x for x in CAT_IMG.split()]
-        A_IMG = list(CAT)
-        PIC = random.choice(A_IMG)
-        ms = (end - start).microseconds / 1000
-        cat_caption = f"**{CUSTOM_ALIVE_TEXT}**\n\n"
-        cat_caption += f"┏━━━━━━━━━━━━━━━━┓\n"
-        cat_caption += f"┃**{EMOJI} ᴜꜱᴇʀʙᴏᴛ ᴠᴇʀꜱɪᴏɴ:** `{catversion}`\n"
-        cat_caption += f"┃**{EMOJI} ᴅᴇᴀᴅ ꜱɪɴᴄᴇ:** `{uptime}\n`"
-        cat_caption += f"┃**{EMOJI} ꜱᴇɴꜱᴇɪ:** {mention}\n"
-        cat_caption += f"┃**{EMOJI} ꜱᴛᴀᴛᴜꜱ:** `{check_sgnirts}`\n"
-        cat_caption += f"┗━━━━━━━━━━━━━━━━┛\n"
-        cat_caption += f"┏━━━━━━━━━━━━━━┓\n┃ ⁭⁫**{EMOJI} ᴘɪɴɢ :** {ms} ms \n┗━━━━━━━━━━━━━━┛\n"
-        await event.client.send_file(
-            event.chat_id,
-            PIC,
-            caption=cat_caption,
-            reply_to=reply_to_id,
-            allow_cache=True,
-        )
-        await event.delete()
+        CAT = list(CAT_IMG.split())
+        PIC = random.choice(CAT)
+        try:
+            await event.client.send_file(
+                event.chat_id, PIC, caption=caption, reply_to=reply_to_id
+            )
+            await catevent.delete()
+        except (WebpageMediaEmptyError, MediaEmptyError, WebpageCurlFailedError):
+            return await edit_or_reply(
+                catevent,
+                f"**Media Value Error!!**\n__Change the link by __`.setdv`\n\n**__Can't get media from this link :-**__ `{PIC}`",
+            )
     else:
         await edit_or_reply(
             event,
@@ -97,47 +114,49 @@ async def amireallyalive(event):
             f"**{EMOJI} Master:** {mention}\n",
         )
 
-@catub.bot_cmd(
-    pattern=f"^/alive?([\s]+)?$"
+
+temp = """**{ALIVE_TEXT}**
+┏━━━━━━━━━━━━━━━━┓
+┃**{EMOJI} ᴜꜱᴇʀʙᴏᴛ ᴠᴇʀꜱɪᴏɴ:** `{catver}`
+┃**{EMOJI} ᴅᴇᴀᴅ ꜱɪɴᴄᴇ:** `{uptime}`
+┃**{EMOJI} ꜱᴇɴꜱᴇɪ:** {mention}
+┃**{EMOJI} ꜱᴛᴀᴛᴜꜱ:** `{dbhealth}`
+┗━━━━━━━━━━━━━━━━┛
+┏━━━━━━━━━━━━━━┓
+┃ ⁭⁫**{EMOJI} ᴘɪɴɢ :** {ms} ms 
+┗━━━━━━━━━━━━━━┛"""
+
+
+def catalive_text():
+    EMOJI = gvarstatus("ALIVE_EMOJI") or "  ✥ "
+    cat_caption = "**Catuserbot is Up and Running**\n"
+    cat_caption += f"**{EMOJI} Telethon version :** `{version.__version__}\n`"
+    cat_caption += f"**{EMOJI} Catuserbot Version :** `{catversion}`\n"
+    cat_caption += f"**{EMOJI} Python Version :** `{python_version()}\n`"
+    cat_caption += f"**{EMOJI} Master:** {mention}\n"
+    return cat_caption
+
+
+@catub.cat_cmd(
+    pattern="ialive$",
+    command=("ialive", plugin_category),
+    info={
+        "header": "To check bot's alive status via inline mode",
+        "options": "To show media in this cmd you need to set ALIVE_PIC with media link, get this by replying the media by .tgm",
+        "usage": [
+            "{tr}ialive",
+        ],
+    },
 )
 async def amireallyalive(event):
-    start = datetime.now()
-    ANIME = f"{random.choice(ANIME_QUOTE)}"
+    "A kind of showing bot details by your inline bot"
     reply_to_id = await reply_id(event)
-    uptime = await get_readable_time((time.time() - StartTime))
-    _, check_sgnirts = check_data_base_heal_th()
-    EMOJI = gvarstatus("ALIVE_EMOJI") or "✧✧"
-    CUSTOM_ALIVE_TEXT = gvarstatus("ALIVE_TEXT") or ANIME
-    CAT_IMG = gvarstatus("ALIVE_PIC")
+    results = await event.client.inline_query(Config.TG_BOT_USERNAME, "ialive")
+    await results[0].click(event.chat_id, reply_to=reply_to_id, hide_via=True)
     await event.delete()
-    end = datetime.now()
-    if CAT_IMG:
-        CAT = [x for x in CAT_IMG.split()]
-        A_IMG = list(CAT)
-        PIC = random.choice(A_IMG)
-        ms = (end - start).microseconds / 1000
-        cat_caption = f"**{CUSTOM_ALIVE_TEXT}**\n\n"
-        cat_caption += f"┏━━━━━━━━━━━━━━━━┓\n"
-        cat_caption += f"┃**{EMOJI} ᴜꜱᴇʀʙᴏᴛ ᴠᴇʀꜱɪᴏɴ:** `{catversion}`\n"
-        cat_caption += f"┃**{EMOJI} ᴅᴇᴀᴅ ꜱɪɴᴄᴇ:** `{uptime}\n`"
-        cat_caption += f"┃**{EMOJI} ꜱᴇɴꜱᴇɪ:** {mention}\n"
-        cat_caption += f"┃**{EMOJI} ꜱᴛᴀᴛᴜꜱ:** `{check_sgnirts}`\n"
-        cat_caption += f"┗━━━━━━━━━━━━━━━━┛\n"
-        cat_caption += f"┏━━━━━━━━━━━━━━┓\n┃ ⁭⁫**{EMOJI} ᴘɪɴɢ :** {ms} ms \n┗━━━━━━━━━━━━━━┛\n"
-        await event.client.send_file(
-            event.chat_id,
-            PIC,
-            caption=cat_caption,
-            reply_to=reply_to_id,
-            allow_cache=True,
-        )
-    else:
-        await event.respond(
-            f"**{ANIME}**\n\n"
-            f"**{EMOJI} Database :** `{check_sgnirts}`\n"
-            f"**{EMOJI} Telethon Version :** `{version.__version__}\n`"
-            f"**{EMOJI} Catuserbot Version :** `{catversion}`\n"
-            f"**{EMOJI} Python Version :** `{python_version()}\n`"
-            f"**{EMOJI} Uptime :** `{uptime}\n`"
-            f"**{EMOJI} Master:** {mention}\n",
-        )
+
+
+@catub.tgbot.on(CallbackQuery(data=re.compile(b"stats")))
+async def on_plug_in_callback_query_handler(event):
+    statstext = await catalive(StartTime)
+    await event.answer(statstext, cache_time=0, alert=True)

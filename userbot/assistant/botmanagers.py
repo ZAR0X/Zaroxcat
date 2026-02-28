@@ -1,3 +1,12 @@
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~# CatUserBot #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# Copyright (C) 2020-2023 by TgCatUB@Github.
+
+# This file is part of: https://github.com/TgCatUB/catuserbot
+# and is released under the "GNU v3.0 License Agreement".
+
+# Please see: https://github.com/TgCatUB/catuserbot/blob/master/LICENSE
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
 from datetime import datetime
 from math import floor
 
@@ -49,9 +58,9 @@ def progress_str(total: int, current: int) -> str:
     prog_arg = "**Progress** : `{}%`\n" "```[{}{}]```"
     return prog_arg.format(
         percentage,
-        "".join((Config.FINISHED_PROGRESS_STR for i in range(floor(percentage / 5)))),
+        "".join(Config.FINISHED_PROGRESS_STR for _ in range(floor(percentage / 5))),
         "".join(
-            (Config.UNFINISHED_PROGRESS_STR for i in range(20 - floor(percentage / 5)))
+            Config.UNFINISHED_PROGRESS_STR for _ in range(20 - floor(percentage / 5))
         ),
     )
 

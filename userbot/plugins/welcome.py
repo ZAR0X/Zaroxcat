@@ -1,4 +1,16 @@
-# ported from paperplaneExtended by avinashreddy3108 for media support
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~# CatUserBot #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# Copyright (C) 2020-2023 by TgCatUB@Github.
+
+# This file is part of: https://github.com/TgCatUB/catuserbot
+# and is released under the "GNU v3.0 License Agreement".
+
+# Please see: https://github.com/TgCatUB/catuserbot/blob/master/LICENSE
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#
+# Special credits: [Avinash Reddy](https://t.me/avinashreddy3108) for media support
+# Ported from paperplaneExtended
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
 from telethon import events
 from telethon.utils import get_display_name
 
@@ -20,7 +32,7 @@ LOGS = logging.getLogger(__name__)
 
 
 @catub.on(events.ChatAction)
-async def _(event):  # sourcery no-metrics
+async def _(event):  # sourcery no-metrics  # sourcery skip: low-code-quality
     cws = get_current_welcome_settings(event.chat_id)
     if (
         cws
@@ -38,10 +50,8 @@ async def _(event):  # sourcery no-metrics
         title = get_display_name(await event.get_chat()) or "this chat"
         participants = await event.client.get_participants(chat)
         count = len(participants)
-        mention = "<a href='tg://user?id={}'>{}</a>".format(
-            a_user.id, a_user.first_name
-        )
-        my_mention = "<a href='tg://user?id={}'>{}</a>".format(me.id, me.first_name)
+        mention = f"<a href='tg://user?id={a_user.id}'>{a_user.first_name}</a>"
+        my_mention = f"<a href='tg://user?id={me.id}'>{me.first_name}</a>"
         first = a_user.first_name
         last = a_user.last_name
         fullname = f"{first} {last}" if last else first

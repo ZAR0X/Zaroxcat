@@ -1,7 +1,19 @@
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~# CatUserBot #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# Copyright (C) 2020-2023 by TgCatUB@Github.
+
+# This file is part of: https://github.com/TgCatUB/catuserbot
+# and is released under the "GNU v3.0 License Agreement".
+
+# Please see: https://github.com/TgCatUB/catuserbot/blob/master/LICENSE
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
 import asyncio
 import base64
+import contextlib
 
+from telethon.errors.rpcerrorlist import ForbiddenError
 from telethon.tl import functions, types
+from telethon.tl.functions.channels import GetFullChannelRequest
 from telethon.tl.functions.messages import GetStickerSetRequest
 from telethon.tl.functions.messages import ImportChatInviteRequest as Get
 from telethon.utils import get_display_name
@@ -9,8 +21,7 @@ from telethon.utils import get_display_name
 from userbot import catub
 
 from ..core.managers import edit_delete, edit_or_reply
-from ..helpers.tools import media_type
-from ..helpers.utils import _catutils
+from ..helpers import media_type, unsavegif
 from ..sql_helper.globals import addgvar, gvarstatus
 from . import BOTLOG, BOTLOG_CHATID
 
@@ -18,6 +29,7 @@ plugin_category = "extra"
 
 
 async def spam_function(event, sandy, cat, sleeptimem, sleeptimet, DelaySpam=False):
+    # sourcery skip: low-code-quality
     # sourcery no-metrics
     counter = int(cat[0])
     if len(cat) == 2:
@@ -37,7 +49,7 @@ async def spam_function(event, sandy, cat, sleeptimem, sleeptimet, DelaySpam=Fal
             sandy = await event.client.send_file(
                 event.chat_id, sandy, caption=sandy.text
             )
-            await _catutils.unsavegif(event, sandy)
+            await unsavegif(event, sandy)
             await asyncio.sleep(sleeptimem)
         if BOTLOG:
             if DelaySpam is not True:
@@ -67,7 +79,7 @@ async def spam_function(event, sandy, cat, sleeptimem, sleeptimet, DelaySpam=Fal
                 )
 
             sandy = await event.client.send_file(BOTLOG_CHATID, sandy)
-            await _catutils.unsavegif(event, sandy)
+            await unsavegif(event, sandy)
         return
     elif event.reply_to_msg_id and sandy.text:
         spam_message = sandy.text
@@ -115,8 +127,9 @@ async def spam_function(event, sandy, cat, sleeptimem, sleeptimet, DelaySpam=Fal
     pattern="spam ([\s\S]*)",
     command=("spam", plugin_category),
     info={
-        "header": "Floods the text in the chat !! with given number of times,",
-        "description": "Sends the replied media/message <count> times !! in the chat",
+        "header": "Floods the text in the chat !! with given number of times.",
+        "description": "Sends the replied media/message <count> times !! in the chat.",
+        "note": "To stop the spam after starting it use '{tr}end spam' cmd.",
         "usage": ["{tr}spam <count> <text>", "{tr}spam <count> reply to message"],
         "examples": "{tr}spam 10 hi",
     },
@@ -154,7 +167,11 @@ async def spammer(event):
 async def stickerpack_spam(event):
     "To spam the chat with stickers."
     reply = await event.get_reply_message()
-    if not reply or media_type(reply) is None or media_type(reply) != "Sticker":
+    if (
+        not reply
+        or await media_type(reply) is None
+        or await media_type(reply) != "Sticker"
+    ):
         return await edit_delete(
             event, "`reply to any sticker to send all stickers in that pack`"
         )
@@ -173,7 +190,8 @@ async def stickerpack_spam(event):
                 types.InputStickerSetID(
                     id=stickerset_attr.stickerset.id,
                     access_hash=stickerset_attr.stickerset.access_hash,
-                )
+                ),
+                hash=0,
             )
         )
     except Exception:
@@ -181,24 +199,25 @@ async def stickerpack_spam(event):
             catevent,
             "`I guess this sticker is not part of any pack so i cant kang this sticker pack try kang for this sticker`",
         )
-    try:
+    with contextlib.suppress(BaseException):
         hmm = Get(hmm)
         await event.client(hmm)
-    except BaseException:
-        pass
     reqd_sticker_set = await event.client(
         functions.messages.GetStickerSetRequest(
             stickerset=types.InputStickerSetShortName(
                 short_name=f"{get_stickerset.set.short_name}"
-            )
+            ),
+            hash=0,
         )
     )
     addgvar("spamwork", True)
     for m in reqd_sticker_set.documents:
         if gvarstatus("spamwork") is None:
             return
-        await event.client.send_file(event.chat_id, m)
+        with contextlib.suppress(ForbiddenError):
+            await event.client.send_file(event.chat_id, m)
         await asyncio.sleep(0.7)
+    await catevent.delete()
     if BOTLOG:
         if event.is_private:
             await event.client.send_message(
@@ -227,7 +246,7 @@ async def stickerpack_spam(event):
 )
 async def tmeme(event):
     "Spam the text letter by letter."
-    cspam = str("".join(event.text.split(maxsplit=1)[1:]))
+    cspam = "".join(event.text.split(maxsplit=1)[1:])
     message = cspam.replace(" ", "")
     await event.delete()
     addgvar("spamwork", True)
@@ -262,7 +281,7 @@ async def tmeme(event):
 )
 async def tmeme(event):
     "Spam the text word by word"
-    wspam = str("".join(event.text.split(maxsplit=1)[1:]))
+    wspam = "".join(event.text.split(maxsplit=1)[1:])
     message = wspam.split()
     await event.delete()
     addgvar("spamwork", True)
@@ -318,3 +337,120 @@ async def spammer(event):
     await event.delete()
     addgvar("spamwork", True)
     await spam_function(event, reply, cat, sleeptimem, sleeptimet, DelaySpam=True)
+
+
+@catub.cat_cmd(
+    pattern="(r(eact)?spam$)",
+    command=("rspam", plugin_category),
+    info={
+        "header": "React spam to message",
+        "notes": "This a really annyoing spam, so added filter to work with mutual contats only\nUse  [ {tr}end spam ] to stop it",
+        "usage": [
+            "{tr}rspam <reply>",
+            "{tr}reactspam <reply>",
+        ],
+    },
+)
+async def react_spam(event):  # By @FeelDeD
+    "Spam react on message"
+    msg = await event.get_reply_message()
+    if not msg:
+        return await edit_delete(event, "```Reply to a message..```", 10)
+    catevent = await edit_or_reply(event, "Processing...")
+    # checker = (await event.client.get_entity(msg.from_id)).mutual_contact
+    # if not checker:
+    # return await edit_delete(event,"`The user isn't your mutual contact, both need to be in each others contact for this plugin to work..`")
+    emoji = [
+        "👍",
+        "👎",
+        "❤",
+        "🔥",
+        "🥰",
+        "😁",
+        "👏",
+        "🤔",
+        "🤯",
+        "😱",
+        "🤬",
+        "😢",
+        "🎉",
+        "🤩",
+        "🤮",
+        "💩",
+        "🙏",
+        "👌",
+        "🕊",
+        "🤡",
+        "🥱",
+        "🥴",
+        "😍",
+        "🐳",
+        "🌚",
+        "💯",
+        "🌭",
+        "🤣",
+        "⚡",
+        "🍌",
+        "🏆",
+        "💔",
+        "🤨",
+        "😐",
+        "🍓",
+        "🍾",
+        "😡",
+        "👾",
+        "🤷",
+        "😎",
+        "🙊",
+        "💊",
+        "😘",
+        "🦄",
+        "🙉",
+        "💘",
+        "🆒",
+        "🗿",
+        "🤪",
+        "💅",
+        "☃",
+        "🎄",
+        "🎅",
+        "🤗",
+        "✍",
+        "🤝",
+        "😨",
+        "😇",
+        "🙈",
+        "🎃",
+        "👀",
+        "👻",
+        "🤓",
+        "😭",
+        "😴",
+        "😈",
+        "🖕",
+        "💋",
+    ]
+    if isinstance(msg.peer_id, types.PeerUser):
+        emoji = emoji
+    else:
+        emot = []
+        getchat = await event.client(GetFullChannelRequest(channel=event.chat_id))
+        if grp_emoji := getchat.full_chat.available_reactions:
+            emo = grp_emoji
+            try:
+                for a in emo.reactions:
+                    emot.append(a.emoticon)
+                emoji = emot
+            except Exception:
+                emoji = emoji
+        else:
+            return await edit_delete(
+                event, "`Reaction is not active in this chat..`", 6
+            )
+    addgvar("spamwork", True)
+    await catevent.delete()
+    while gvarstatus("spamwork"):
+        for i in emoji:
+            await asyncio.sleep(0.2)
+            with contextlib.suppress(ForbiddenError):
+                await msg.react(i, True)

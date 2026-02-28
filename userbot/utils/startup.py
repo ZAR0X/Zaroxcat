@@ -1,11 +1,19 @@
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~# CatUserBot #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# Copyright (C) 2020-2023 by TgCatUB@Github.
+
+# This file is part of: https://github.com/TgCatUB/catuserbot
+# and is released under the "GNU v3.0 License Agreement".
+
+# Please see: https://github.com/TgCatUB/catuserbot/blob/master/LICENSE
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
 import glob
 import os
 import sys
-from asyncio.exceptions import CancelledError
+import urllib.request
 from datetime import timedelta
 from pathlib import Path
 
-import requests
 from telethon import Button, functions, types, utils
 
 from userbot import BOTLOG, BOTLOG_CHATID, PM_LOGGER_GROUP_ID
@@ -14,17 +22,25 @@ from ..Config import Config
 from ..core.logger import logging
 from ..core.session import catub
 from ..helpers.utils import install_pip
+from ..helpers.utils.utils import runcmd
 from ..sql_helper.global_collection import (
     del_keyword_collectionlist,
     get_item_collectionlist,
 )
-from ..sql_helper.globals import addgvar, delgvar, gvarstatus
+from ..sql_helper.globals import addgvar, gvarstatus
 from .pluginmanager import load_module
 from .tools import create_supergroup
 
-LOGS = logging.getLogger("CatUserbot")
+ENV = bool(os.environ.get("ENV", False))
+LOGS = logging.getLogger("CatUBStartUP")
 cmdhr = Config.COMMAND_HAND_LER
-EXTRA = gvarstatus("EXTRA_PIC") or "https://telegra.ph/file/e9f733ff2e303f29a3544.mp4"
+EXTRA = gvarstatus("EXTRA_PIC") or "https://graph.org/file/e9f733ff2e303f29a3544.mp4"
+
+if ENV:
+    VPS_NOLOAD = ["vps"]
+elif os.path.exists("config.py"):
+    VPS_NOLOAD = ["heroku"]
+
 
 async def setup_bot():
     """
@@ -63,9 +79,9 @@ async def startupmessage():
         if BOTLOG:
             Config.CATUBLOGO = await catub.tgbot.send_file(
                 BOTLOG_CHATID,
-                "https://telegra.ph/file/4e3ba8e8f7e535d5a2abe.jpg",
+                EXTRA,
                 caption="**Your CatUserbot has been started successfully.**",
-                buttons=[(Button.url("Support", "https://t.me/catuserbot"),)],
+                buttons=[(Button.url("Support", "https://t.me/catuserbot_support"),)],
             )
     except Exception as e:
         LOGS.error(e)
@@ -96,26 +112,6 @@ async def startupmessage():
         return None
 
 
-# don't know work or not just a try in future will use sleep
-async def ipchange():
-    """
-    Just to check if ip change or not
-    """
-    newip = (requests.get("https://httpbin.org/ip").json())["origin"]
-    if gvarstatus("ipaddress") is None:
-        addgvar("ipaddress", newip)
-        return None
-    oldip = gvarstatus("ipaddress")
-    if oldip != newip:
-        delgvar("ipaddress")
-        LOGS.info("Ip Change detected")
-        try:
-            await catub.disconnect()
-        except (ConnectionError, CancelledError):
-            pass
-        return "ip change"
-
-
 async def add_bot_to_logger_group(chat_id):
     """
     To add bot to logger groups
@@ -141,38 +137,61 @@ async def add_bot_to_logger_group(chat_id):
             LOGS.error(str(e))
 
 
-async def load_plugins(folder):
+async def load_plugins(folder, extfolder=None):
     """
     To load plugins from the mentioned folder
     """
-    path = f"userbot/{folder}/*.py"
+    if extfolder:
+        path = f"{extfolder}/*.py"
+        plugin_path = extfolder
+    else:
+        path = f"userbot/{folder}/*.py"
+        plugin_path = f"userbot/{folder}"
     files = glob.glob(path)
     files.sort()
+    success = 0
+    failure = []
     for name in files:
         with open(name) as f:
             path1 = Path(f.name)
             shortname = path1.stem
+            pluginname = shortname.replace(".py", "")
             try:
-                if shortname.replace(".py", "") not in Config.NO_LOAD:
+                if (pluginname not in Config.NO_LOAD) and (
+                    pluginname not in VPS_NOLOAD
+                ):
                     flag = True
                     check = 0
                     while flag:
                         try:
                             load_module(
-                                shortname.replace(".py", ""),
-                                plugin_path=f"userbot/{folder}",
+                                pluginname,
+                                plugin_path=plugin_path,
                             )
+                            if shortname in failure:
+                                failure.remove(shortname)
+                            success += 1
                             break
                         except ModuleNotFoundError as e:
                             install_pip(e.name)
                             check += 1
+                            if shortname not in failure:
+                                failure.append(shortname)
                             if check > 5:
                                 break
                 else:
-                    os.remove(Path(f"userbot/{folder}/{shortname}.py"))
+                    os.remove(Path(f"{plugin_path}/{shortname}.py"))
             except Exception as e:
-                os.remove(Path(f"userbot/{folder}/{shortname}.py"))
-                LOGS.info(f"unable to load {shortname} because of error {e}")
+                if shortname not in failure:
+                    failure.append(shortname)
+                os.remove(Path(f"{plugin_path}/{shortname}.py"))
+                LOGS.info(
+                    f"unable to load {shortname} because of error {e}\nBase Folder {plugin_path}"
+                )
+    if extfolder:
+        if not failure:
+            failure.append("None")
+        return success, failure
 
 
 async def verifyLoggerGroup():
@@ -184,11 +203,17 @@ async def verifyLoggerGroup():
         try:
             entity = await catub.get_entity(BOTLOG_CHATID)
             if not isinstance(entity, types.User) and not entity.creator:
-                if entity.default_banned_rights.send_messages:
+                if (
+                    entity.default_banned_rights
+                    and entity.default_banned_rights.send_messages
+                ) or not entity.admin_rights.post_messages:
                     LOGS.info(
                         "Permissions missing to send messages for the specified PRIVATE_GROUP_BOT_API_ID."
                     )
-                if entity.default_banned_rights.invite_users:
+                if (
+                    entity.default_banned_rights
+                    and entity.default_banned_rights.invite_users
+                ) or not entity.admin_rights.invite_users:
                     LOGS.info(
                         "Permissions missing to addusers for the specified PRIVATE_GROUP_BOT_API_ID."
                     )
@@ -211,7 +236,7 @@ async def verifyLoggerGroup():
             "CatUserbot BotLog Group", catub, Config.TG_BOT_USERNAME, descript
         )
         addgvar("PRIVATE_GROUP_BOT_API_ID", groupid)
-        print(
+        LOGS.info(
             "Private Group for PRIVATE_GROUP_BOT_API_ID is created successfully and added to vars."
         )
         flag = True
@@ -219,11 +244,17 @@ async def verifyLoggerGroup():
         try:
             entity = await catub.get_entity(PM_LOGGER_GROUP_ID)
             if not isinstance(entity, types.User) and not entity.creator:
-                if entity.default_banned_rights.send_messages:
+                if (
+                    entity.default_banned_rights
+                    and entity.default_banned_rights.send_messages
+                ) or not entity.admin_rights.post_messages:
                     LOGS.info(
                         "Permissions missing to send messages for the specified PM_LOGGER_GROUP_ID."
                     )
-                if entity.default_banned_rights.invite_users:
+                if (
+                    entity.default_banned_rights
+                    and entity.default_banned_rights.invite_users
+                ) or not entity.admin_rights.invite_users:
                     LOGS.info(
                         "Permissions missing to addusers for the specified PM_LOGGER_GROUP_ID."
                     )
@@ -241,3 +272,33 @@ async def verifyLoggerGroup():
         args = [executable, "-m", "userbot"]
         os.execle(executable, *args, os.environ)
         sys.exit(0)
+
+
+async def install_externalrepo(repo, branch, cfolder):
+    CATREPO = repo
+    rpath = os.path.join(cfolder, "requirements.txt")
+    if CATBRANCH := branch:
+        repourl = os.path.join(CATREPO, f"tree/{CATBRANCH}")
+        gcmd = f"git clone -b {CATBRANCH} {CATREPO} {cfolder}"
+        errtext = f"There is no branch with name `{CATBRANCH}` in your external repo {CATREPO}. Recheck branch name and correct it in vars(`EXTERNAL_REPO_BRANCH`)"
+    else:
+        repourl = CATREPO
+        gcmd = f"git clone {CATREPO} {cfolder}"
+        errtext = f"The link({CATREPO}) you provided for `EXTERNAL_REPO` in vars is invalid. please recheck that link"
+    response = urllib.request.urlopen(repourl)
+    if response.code != 200:
+        LOGS.error(errtext)
+        return await catub.tgbot.send_message(BOTLOG_CHATID, errtext)
+    await runcmd(gcmd)
+    if not os.path.exists(cfolder):
+        LOGS.error(
+            "There was a problem in cloning the external repo. please recheck external repo link"
+        )
+        return await catub.tgbot.send_message(
+            BOTLOG_CHATID,
+            "There was a problem in cloning the external repo. please recheck external repo link",
+        )
+    if os.path.exists(rpath):
+        await runcmd(f"pip3 install --no-cache-dir -r {rpath}")
+    success, failure = await load_plugins(folder="userbot", extfolder=cfolder)
+    return repourl, cfolder, success, failure

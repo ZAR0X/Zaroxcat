@@ -1,3 +1,12 @@
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~# CatUserBot #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# Copyright (C) 2020-2023 by TgCatUB@Github.
+
+# This file is part of: https://github.com/TgCatUB/catuserbot
+# and is released under the "GNU v3.0 License Agreement".
+
+# Please see: https://github.com/TgCatUB/catuserbot/blob/master/LICENSE
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
 import os
 from datetime import datetime
 
@@ -35,8 +44,8 @@ async def source(e):
     "Source code link of userbot"
     await edit_or_reply(
         e,
-        "Click [here](https://github.com/sandy1709/catuserbot) to open this bot source code\
-        \nClick [here](https://github.com/Mr-confused/nekopack) to open supported link for heroku",
+        "Click [here](https://github.com/TgCatUB/catuserbot) to open this bot source code\
+        \nClick [here](https://github.com/TgCatUB/nekopack) to open supported link for heroku",
     )
 
 
@@ -58,7 +67,7 @@ async def _(event):
     async with aiohttp.ClientSession() as session:
         async with session.get(URL) as request:
             if request.status == 404:
-                return await edit_delete(event, "`" + username + " not found`")
+                return await edit_delete(event, f"`{username} not found`")
             catevent = await edit_or_reply(event, "`fetching github info ...`")
             result = await request.json()
             photo = result["avatar_url"]
@@ -68,7 +77,7 @@ async def _(event):
             sec_res = requests.get(result["repos_url"])
             if sec_res.status_code == 200:
                 limit = event.pattern_match.group(2)
-                limit = 5 if not limit else int(limit)
+                limit = int(limit) if limit else 5
                 for repo in sec_res.json():
                     repos.append(f"[{repo['name']}]({repo['html_url']})")
                     limit -= 1
@@ -143,9 +152,7 @@ async def download(event):
     else:
         end = datetime.now()
         ms = (end - start).seconds
-        await mone.edit(
-            "Downloaded to `{}` in {} seconds.".format(downloaded_file_name, ms)
-        )
+        await mone.edit(f"Downloaded to `{downloaded_file_name}` in {ms} seconds.")
         await mone.edit("Committing to Github....")
         await git_commit(downloaded_file_name, mone)
 
@@ -165,10 +172,10 @@ async def git_commit(file_name, mone):
         LOGS.info(content_file)
     for i in content_list:
         create_file = True
-        if i == 'ContentFile(path="' + file_name + '")':
+        if i == f'ContentFile(path="{file_name}")':
             return await mone.edit("`File Already Exists`")
     if create_file:
-        file_name = "userbot/plugins/" + file_name
+        file_name = f"userbot/plugins/{file_name}"
         LOGS.info(file_name)
         try:
             repo.create_file(

@@ -1,3 +1,13 @@
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~# CatUserBot #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# Copyright (C) 2020-2023 by TgCatUB@Github.
+
+# This file is part of: https://github.com/TgCatUB/catuserbot
+# and is released under the "GNU v3.0 License Agreement".
+
+# Please see: https://github.com/TgCatUB/catuserbot/blob/master/LICENSE
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+import contextlib
 import importlib
 import sys
 from pathlib import Path
@@ -9,8 +19,7 @@ from ..core import LOADED_CMDS, PLG_INFO
 from ..core.logger import logging
 from ..core.managers import edit_delete, edit_or_reply
 from ..core.session import catub
-from ..helpers.tools import media_type
-from ..helpers.utils import _cattools, _catutils, _format, install_pip, reply_id
+from ..helpers.utils import _catutils, _format, install_pip, reply_id
 from .decorators import admin_cmd, sudo_cmd
 
 LOGS = logging.getLogger("CatUserbot")
@@ -20,13 +29,7 @@ def load_module(shortname, plugin_path=None):
     if shortname.startswith("__"):
         pass
     elif shortname.endswith("_"):
-        path = Path(f"userbot/plugins/{shortname}.py")
-        checkplugins(path)
-        name = "userbot.plugins.{}".format(shortname)
-        spec = importlib.util.spec_from_file_location(name, path)
-        mod = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(mod)
-        LOGS.info("Successfully imported " + shortname)
+        load_module_sortner(shortname)
     else:
         if plugin_path is None:
             path = Path(f"userbot/plugins/{shortname}.py")
@@ -41,25 +44,32 @@ def load_module(shortname, plugin_path=None):
         mod.LOGS = LOGS
         mod.Config = Config
         mod._format = _format
-        mod.tgbot = catub.tgbot
         mod.sudo_cmd = sudo_cmd
         mod.CMD_HELP = CMD_HELP
         mod.reply_id = reply_id
         mod.admin_cmd = admin_cmd
         mod._catutils = _catutils
-        mod._cattools = _cattools
-        mod.media_type = media_type
         mod.edit_delete = edit_delete
         mod.install_pip = install_pip
         mod.parse_pre = _format.parse_pre
         mod.edit_or_reply = edit_or_reply
+        mod.tgbot = catub.tgbot
         mod.logger = logging.getLogger(shortname)
         mod.borg = catub
         spec.loader.exec_module(mod)
         # for imports
-        sys.modules["userbot.plugins." + shortname] = mod
-        LOGS.info("Successfully imported " + shortname)
-    return shortname
+        sys.modules[f"userbot.plugins.{shortname}"] = mod
+        LOGS.info(f"Successfully imported {shortname}")
+
+
+def load_module_sortner(shortname):
+    path = Path(f"userbot/plugins/{shortname}.py")
+    checkplugins(path)
+    name = f"userbot.plugins.{shortname}"
+    spec = importlib.util.spec_from_file_location(name, path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    LOGS.info(f"Successfully imported {shortname}")
 
 
 def remove_plugin(shortname):
@@ -77,20 +87,18 @@ def remove_plugin(shortname):
         return True
     except Exception as e:
         LOGS.error(e)
-    try:
+    with contextlib.suppress(BaseException):
         for i in LOAD_PLUG[shortname]:
             catub.remove_event_handler(i)
         del LOAD_PLUG[shortname]
-    except BaseException:
-        pass
     try:
         name = f"userbot.plugins.{shortname}"
         for i in reversed(range(len(catub._event_builders))):
             ev, cb = catub._event_builders[i]
             if cb.__module__ == name:
                 del catub._event_builders[i]
-    except BaseException:
-        raise ValueError
+    except BaseException as exc:
+        raise ValueError from exc
 
 
 def checkplugins(filename):

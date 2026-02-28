@@ -1,4 +1,12 @@
-# Userbot module for purging unneeded messages(usually spam or ot).
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~# CatUserBot #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# Copyright (C) 2020-2023 by TgCatUB@Github.
+
+# This file is part of: https://github.com/TgCatUB/catuserbot
+# and is released under the "GNU v3.0 License Agreement".
+
+# Please see: https://github.com/TgCatUB/catuserbot/blob/master/LICENSE
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
 import re
 from asyncio import sleep
 
@@ -187,9 +195,9 @@ async def purgeme(event):
         await message.delete()
 
     smsg = await event.client.send_message(
-        event.chat_id,
-        "**Purge complete!**` Purged " + str(count) + " messages.`",
+        event.chat_id, f"**Purge complete!**` Purged {count} messages.`"
     )
+
     if BOTLOG:
         await event.client.send_message(
             BOTLOG_CHATID,
@@ -236,7 +244,7 @@ async def purgeme(event):
         ],
     },
 )
-async def fastpurger(event):  # sourcery no-metrics
+async def fastpurger(event):  # sourcery no-metrics # sourcery skip: low-code-quality
     "To purge messages from the replied message"
     chat = await event.get_input_chat()
     msgs = []
@@ -481,7 +489,7 @@ async def fastpurger(event):  # sourcery no-metrics
         ],
     },
 )
-async def fast_purger(event):  # sourcery no-metrics
+async def fast_purger(event):  # sourcery no-metrics # sourcery skip: low-code-quality
     "To purge messages from the replied message of replied user."
     chat = await event.get_input_chat()
     msgs = []
@@ -567,7 +575,7 @@ async def fast_purger(event):  # sourcery no-metrics
         result += "__Fast purge completed!\nPurged __`" + str(count) + "` __messages.__"
     if error != "":
         result += f"\n\n**Error:**{error}"
-    if result == "":
+    if not result:
         result += "__There are no messages to purge.__"
     hi = await event.client.send_message(event.chat_id, result)
     if BOTLOG:

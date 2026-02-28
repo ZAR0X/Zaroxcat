@@ -1,15 +1,22 @@
-"""
-Telegram Channel Media Downloader Plugin for userbot.
-usage: .geta channel_username [will  get all media from channel, tho there is limit of 3000 there to prevent API limits.]
-       .getc number_of_messsages channel_username
-By: @Zero_cool7870
-"""
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~# CatUserBot #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# Copyright (C) 2020-2023 by TgCatUB@Github.
+
+# This file is part of: https://github.com/TgCatUB/catuserbot
+# and is released under the "GNU v3.0 License Agreement".
+
+# Please see: https://github.com/TgCatUB/catuserbot/blob/master/LICENSE
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# Special credits:
+# [Zero Cool](https://t.me/Zero_cool7870) (For Channel Media Downloader Plugin)
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 
+import contextlib
 import os
 import subprocess
 
 from ..Config import Config
+from ..helpers.tools import media_type
 from . import catub, edit_or_reply
 
 plugin_category = "tools"
@@ -31,15 +38,13 @@ async def get_media(event):
     limit = int(catty.split(" ")[0])
     channel_username = str(catty.split(" ")[1])
     tempdir = os.path.join(Config.TMP_DOWNLOAD_DIRECTORY, channel_username)
-    try:
+    with contextlib.suppress(BaseException):
         os.makedirs(tempdir)
-    except BaseException:
-        pass
     event = await edit_or_reply(event, "`Downloading Media From this Channel.`")
-    msgs = await event.client.get_messages(channel_username, limit=int(limit))
+    msgs = await event.client.get_messages(channel_username, limit=limit)
     i = 0
     for msg in msgs:
-        mediatype = media_type(msg)
+        mediatype = await media_type(msg)
         if mediatype is not None:
             await event.client.download_media(msg, tempdir)
             i += 1
@@ -71,15 +76,13 @@ async def get_media(event):
 async def get_media(event):
     channel_username = event.pattern_match.group(1)
     tempdir = os.path.join(Config.TMP_DOWNLOAD_DIRECTORY, channel_username)
-    try:
+    with contextlib.suppress(BaseException):
         os.makedirs(tempdir)
-    except BaseException:
-        pass
     event = await edit_or_reply(event, "`Downloading All Media From this Channel.`")
     msgs = await event.client.get_messages(channel_username, limit=3000)
     i = 0
     for msg in msgs:
-        mediatype = media_type(msg)
+        mediatype = await media_type(msg)
         if mediatype is not None:
             await event.client.download_media(msg, tempdir)
             i += 1

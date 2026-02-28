@@ -1,8 +1,16 @@
-"""Get a Image Post from Reddit"""
-# 👍 https://github.com/D3vd for his awesome API
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~# CatUserBot #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# Copyright (C) 2020-2023 by TgCatUB@Github.
+
+# This file is part of: https://github.com/TgCatUB/catuserbot
+# and is released under the "GNU v3.0 License Agreement".
+
+# Please see: https://github.com/TgCatUB/catuserbot/blob/master/LICENSE
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# Special credits: [Dev](https://github.com/D3vd) for his awesome API
 #
 # Copyright (C) 2020 BY - GitHub.com/code-rgb [TG - @DeletedUser420]
 # All rights reserved.
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 
 import requests
@@ -11,8 +19,8 @@ from userbot import catub
 
 from ..core.logger import logging
 from ..core.managers import edit_delete
-from ..helpers.functions import age_verification
-from ..helpers.utils import _catutils, reply_id
+from ..helpers.functions import age_verification, unsavegif
+from ..helpers.utils import reply_id
 from . import BOTLOG, BOTLOG_CHATID
 
 LOGS = logging.getLogger(__name__)
@@ -77,4 +85,4 @@ async def reddit_fetch(event):
             event.chat_id, media_url, caption=captionx, reply_to=reply_to
         )
         if media_url.endswith(".gif"):
-            await _catutils.unsavegif(event, sandy)
+            await unsavegif(event, sandy)

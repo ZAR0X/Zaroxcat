@@ -1,12 +1,17 @@
-"""
-Thenks goes to Emily ( The creater of Poto cmd) from ftg userbot
-"""
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~# CatUserBot #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# Copyright (C) 2020-2023 by TgCatUB@Github.
+
+# This file is part of: https://github.com/TgCatUB/catuserbot
+# and is released under the "GNU v3.0 License Agreement".
+
+# Please see: https://github.com/TgCatUB/catuserbot/blob/master/LICENSE
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# Special credits: Emily (For creating Poto cmd from ftg userbot)
 
 from PIL import Image, ImageFilter, UnidentifiedImageError
 
-from userbot import catub
-
 from ..core.managers import edit_delete, edit_or_reply
+from . import catub, reply_id
 
 plugin_category = "extra"
 
@@ -40,9 +45,9 @@ async def potocmd(event):
     else:
         photos = await event.client.get_profile_photos(chat)
         u = False
-    if uid.strip() == "":
+    if not uid.strip():
         uid = 1
-        if int(uid) > (len(photos)):
+        if uid > (len(photos)):
             return await edit_delete(
                 event, "`No photo found of this NIBBA / NIBBI. Now u Die!`"
             )
@@ -71,7 +76,7 @@ async def potocmd(event):
         except BaseException:
             await edit_or_reply(event, "`Are you comedy me ?`")
             return
-        if int(uid) > (len(photos)):
+        if uid > (len(photos)):
             return await edit_delete(
                 event, "`No photo found of this NIBBA / NIBBI. Now u Die!`"
             )

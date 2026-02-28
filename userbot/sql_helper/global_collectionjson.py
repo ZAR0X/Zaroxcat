@@ -1,3 +1,12 @@
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~# CatUserBot #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# Copyright (C) 2020-2023 by TgCatUB@Github.
+
+# This file is part of: https://github.com/TgCatUB/catuserbot
+# and is released under the "GNU v3.0 License Agreement".
+
+# Please see: https://github.com/TgCatUB/catuserbot/blob/master/LICENSE
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
 from sqlalchemy import Column, UnicodeText
 from sqlalchemy_json import MutableJson, NestedMutableJson
 
@@ -26,9 +35,10 @@ def get_collection(keywoard):
         SESSION.close()
 
 
-def add_collection(keywoard, json, njson={}):
-    to_check = get_collection(keywoard)
-    if to_check:
+def add_collection(keywoard, json, njson=None):
+    if njson is None:
+        njson = {}
+    if to_check := get_collection(keywoard):
         keyword_items = SESSION.query(Cat_GlobalCollection_Json).get(keywoard)
         SESSION.delete(keyword_items)
     keyword_items = Cat_GlobalCollection_Json(keywoard, json, njson)

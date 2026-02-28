@@ -1,9 +1,15 @@
-try:
-    from . import BASE, SESSION
-except ImportError:
-    raise AttributeError
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~# CatUserBot #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# Copyright (C) 2020-2023 by TgCatUB@Github.
+
+# This file is part of: https://github.com/TgCatUB/catuserbot
+# and is released under the "GNU v3.0 License Agreement".
+
+# Please see: https://github.com/TgCatUB/catuserbot/blob/master/LICENSE
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 from sqlalchemy import BigInteger, Column, Numeric, String, UnicodeText
+
+from . import BASE, SESSION
 
 
 class Welcome(BASE):
@@ -56,8 +62,7 @@ def add_welcome_setting(chat_id, previous_welcome, reply, f_mesg_id):
 
 def rm_welcome_setting(chat_id):
     try:
-        rem = SESSION.query(Welcome).get(str(chat_id))
-        if rem:
+        if rem := SESSION.query(Welcome).get(str(chat_id)):
             SESSION.delete(rem)
             SESSION.commit()
             return True

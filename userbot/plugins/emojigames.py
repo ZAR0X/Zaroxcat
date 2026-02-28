@@ -1,4 +1,15 @@
-# imported from uniborg credit goes to spechide
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~# CatUserBot #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# Copyright (C) 2020-2023 by TgCatUB@Github.
+
+# This file is part of: https://github.com/TgCatUB/catuserbot
+# and is released under the "GNU v3.0 License Agreement".
+
+# Please see: https://github.com/TgCatUB/catuserbot/blob/master/LICENSE
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# Special credits: @spechide (ported from uniborg)
+
+import contextlib
+
 from telethon.tl.types import InputMediaDice
 
 from . import catub
@@ -41,13 +52,11 @@ async def _(event):
         emoticon = "🎯"
     r = await reply_message.reply(file=InputMediaDice(emoticon=emoticon))
     if input_str:
-        try:
+        with contextlib.suppress(BaseException):
             required_number = int(input_str)
             while r.media.value != required_number:
                 await r.delete()
                 r = await reply_message.reply(file=InputMediaDice(emoticon=emoticon))
-        except BaseException:
-            pass
     elif event.sender_id == event.client.uid:
         await event.edit(file=InputMediaDice(emoticon=emoticon))
     else:
@@ -80,13 +89,11 @@ async def _(event):
         emoticon = "🎲"
     r = await reply_message.reply(file=InputMediaDice(emoticon=emoticon))
     if input_str:
-        try:
+        with contextlib.suppress(BaseException):
             required_number = int(input_str)
             while r.media.value != required_number:
                 await r.delete()
                 r = await reply_message.reply(file=InputMediaDice(emoticon=emoticon))
-        except BaseException:
-            pass
     elif event.sender_id == event.client.uid:
         await event.edit(file=InputMediaDice(emoticon=emoticon))
     else:
@@ -119,13 +126,11 @@ async def _(event):
         emoticon = "🏀"
     r = await reply_message.reply(file=InputMediaDice(emoticon=emoticon))
     if input_str:
-        try:
+        with contextlib.suppress(BaseException):
             required_number = int(input_str)
             while r.media.value != required_number:
                 await r.delete()
                 r = await reply_message.reply(file=InputMediaDice(emoticon=emoticon))
-        except BaseException:
-            pass
     elif event.sender_id == event.client.uid:
         await event.edit(file=InputMediaDice(emoticon=emoticon))
     else:
@@ -158,13 +163,11 @@ async def _(event):
         emoticon = "⚽️"
     r = await reply_message.reply(file=InputMediaDice(emoticon=emoticon))
     if input_str:
-        try:
+        with contextlib.suppress(BaseException):
             required_number = int(input_str)
             while r.media.value != required_number:
                 await r.delete()
                 r = await reply_message.reply(file=InputMediaDice(emoticon=emoticon))
-        except BaseException:
-            pass
     elif event.sender_id == event.client.uid:
         await event.edit(file=InputMediaDice(emoticon=emoticon))
     else:
@@ -199,13 +202,11 @@ async def _(event):
         emoticon = "🎰"
     r = await reply_message.reply(file=InputMediaDice(emoticon=emoticon))
     if input_str:
-        try:
-            required_number = int(input_str)
+        with contextlib.suppress(BaseException):
+            required_number = input_str
             while r.media.value != required_number:
                 await r.delete()
                 r = await reply_message.reply(file=InputMediaDice(emoticon=emoticon))
-        except BaseException:
-            pass
     elif event.sender_id == event.client.uid:
         await event.edit(file=InputMediaDice(emoticon=emoticon))
     else:
@@ -238,13 +239,11 @@ async def _(event):
         emoticon = "🎳"
     r = await reply_message.reply(file=InputMediaDice(emoticon=emoticon))
     if input_str:
-        try:
+        with contextlib.suppress(BaseException):
             required_number = int(input_str)
             while r.media.value != required_number:
                 await r.delete()
                 r = await reply_message.reply(file=InputMediaDice(emoticon=emoticon))
-        except BaseException:
-            pass
     elif event.sender_id == event.client.uid:
         await event.edit(file=InputMediaDice(emoticon=emoticon))
     else:

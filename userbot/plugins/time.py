@@ -1,3 +1,12 @@
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~# CatUserBot #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# Copyright (C) 2020-2023 by TgCatUB@Github.
+
+# This file is part of: https://github.com/TgCatUB/catuserbot
+# and is released under the "GNU v3.0 License Agreement".
+
+# Please see: https://github.com/TgCatUB/catuserbot/blob/master/LICENSE
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
 import os
 from datetime import datetime as dt
 
@@ -13,8 +22,6 @@ from ..core.managers import edit_or_reply
 from . import reply_id
 
 plugin_category = "utils"
-
-# Userbot timezone
 
 
 FONT_FILE_TO_USE = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
@@ -45,13 +52,13 @@ async def get_tz(con):
 
 
 @catub.cat_cmd(
-    pattern="ctime(?:\s|$)([\s\S]*)(?<![0-9])(?: |$)([0-9]+)?",
-    command=("ctime", plugin_category),
+    pattern="time(?:\s|$)([\s\S]*)(?<![0-9])(?: |$)([0-9]+)?",
+    command=("time", plugin_category),
     info={
         "header": "To get current time of a paticular country",
-        "note": "For country names check [this link](https://telegra.ph/country-names-10-24)",
-        "usage": "{tr}ctime <country name/code> <timezone number>",
-        "examples": "{tr}ctime Brazil 2",
+        "note": "For country names check [this link](https://graph.org/country-names-10-24)",
+        "usage": "{tr}time <country name/code> <timezone number>",
+        "examples": "{tr}time Brazil 2",
     },
 )
 async def time_func(tdata):
@@ -112,12 +119,12 @@ async def time_func(tdata):
 
 
 @catub.cat_cmd(
-    pattern="time(?:\s|$)([\s\S]*)",
-    command=("time", plugin_category),
+    pattern="(s|p|c)time(?:\s|$)([\s\S]*)",
+    command=("stime", plugin_category),
     info={
         "header": "To show current time.",
         "description": "shows current default time you can change by changing TZ in heroku vars.",
-        "usage": "{tr}time",
+        "usage": "{tr}stime",
     },
 )
 async def _(event):
@@ -126,12 +133,11 @@ async def _(event):
     current_time = dt.now().strftime(
         f"⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡\n⚡USERBOT TIMEZONE⚡\n⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡\n   {os.path.basename(Config.TZ)}\n  Time: %H:%M:%S \n  Date: %d.%m.%y \n⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡"
     )
-    input_str = event.pattern_match.group(1)
-    if input_str:
+    if input_str := event.pattern_match.group(2):
         current_time = input_str
     if not os.path.isdir(Config.TEMP_DIR):
         os.makedirs(Config.TEMP_DIR)
-    required_file_name = Config.TEMP_DIR + " " + str(dt.now()) + ".webp"
+    required_file_name = f"{Config.TEMP_DIR} {str(dt.now())}.webp"
     img = Image.new("RGBA", (350, 220), color=(0, 0, 0, 115))
     fnt = ImageFont.truetype(FONT_FILE_TO_USE, 30)
     drawn_text = ImageDraw.Draw(img)

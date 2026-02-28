@@ -1,3 +1,12 @@
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~# CatUserBot #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# Copyright (C) 2020-2023 by TgCatUB@Github.
+
+# This file is part of: https://github.com/TgCatUB/catuserbot
+# and is released under the "GNU v3.0 License Agreement".
+
+# Please see: https://github.com/TgCatUB/catuserbot/blob/master/LICENSE
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
 import os
 
 from telethon.errors.rpcerrorlist import UsernameOccupiedError
@@ -239,8 +248,7 @@ async def remove_profilepic(delpfp):
 async def _(event):
     "To list all public channels and groups."
     result = await event.client(GetAdminedPublicChannelsRequest())
-    output_str = "**Your current reserved usernames are:**\n"
-    output_str += "".join(
+    output_str = "**Your current reserved usernames are:**\n" + "".join(
         f" - {channel_obj.title} @{channel_obj.username} \n"
         for channel_obj in result.chats
     )

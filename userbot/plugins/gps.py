@@ -1,4 +1,12 @@
-#    Credts @Mrconfused
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~# CatUserBot #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# Copyright (C) 2020-2023 by TgCatUB@Github.
+
+# This file is part of: https://github.com/TgCatUB/catuserbot
+# and is released under the "GNU v3.0 License Agreement".
+
+# Please see: https://github.com/TgCatUB/catuserbot/blob/master/LICENSE
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
 from geopy.geocoders import Nominatim
 from telethon.tl import types
 
@@ -25,8 +33,7 @@ async def gps(event):
     input_str = event.pattern_match.group(1)
     catevent = await edit_or_reply(event, "`finding.....`")
     geolocator = Nominatim(user_agent="catuserbot")
-    geoloc = geolocator.geocode(input_str)
-    if geoloc:
+    if geoloc := geolocator.geocode(input_str):
         lon = geoloc.longitude
         lat = geoloc.latitude
         await event.client.send_file(
